@@ -1,0 +1,133 @@
+@import "tailwindcss";
+@import "@fontsource-variable/vazirmatn";
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    /* Bytic Primary Green: #35b40e */
+    --primary: 106 86% 38%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Bytic Secondary Coral/Crimson: #fb4364 */
+    --secondary: 349 96% 62%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 106 70% 95%;
+    --accent-foreground: 106 86% 25%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 106 86% 38%;
+    
+    --radius: 0.625rem;
+
+    --bytic-green: #35b40e;
+    --bytic-coral: #fb4364;
+    --bytic-navy: #0e2338;
+    --bytic-surface: #1b344d;
+  }
+
+  .dark {
+    /* Bytic Dark Palette: #0e2338 body, #1b344d card, #0f1e2f header, #1e3955 border */
+    --background: 210 60% 14%;
+    --foreground: 210 40% 98%;
+    
+    --card: 210 48% 21%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 211 68% 15%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Bytic Vibrant Green in Dark Mode */
+    --primary: 106 84% 44%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Bytic Coral in Dark Mode */
+    --secondary: 349 96% 67%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 211 48% 18%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 210 48% 26%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 211 48% 23%;
+    --input: 211 48% 23%;
+    --ring: 106 84% 44%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Vazirmatn Variable', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@theme {
+  --font-sans: 'Vazirmatn Variable', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-bytic-green: #35b40e;
+  --color-bytic-coral: #fb4364;
+  --color-bytic-dark-body: #0e2338;
+  --color-bytic-dark-card: #1b344d;
+  --color-bytic-dark-header: #0f1e2f;
+  --color-bytic-dark-input: #1e3955;
+  --color-bytic-dark-popup: #0c243f;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
