@@ -1,9 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { sendJson } from './response.js';
-import studentsHandler from '../students/index.js';
-import attendanceHandler from '../attendance/index.js';
-import markAllHandler from '../attendance/mark-all.js';
-import statsHandler from '../stats.js';
 
 export type RouteHandler = (
   req: IncomingMessage,
@@ -128,12 +124,6 @@ export function createDefaultApiRouter(): Router {
   };
   router.get('/health', healthHandler);
   router.get('/api/health', healthHandler);
-
-  // Core API routes
-  router.all('/api/students', studentsHandler);
-  router.all('/api/attendance', attendanceHandler);
-  router.all('/api/attendance/mark-all', markAllHandler);
-  router.all('/api/stats', statsHandler);
 
   return router;
 }

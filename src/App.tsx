@@ -1,105 +1,22 @@
-import * as React from 'react';
-import { Header } from '@/components/attendance/Header';
-import { AttendanceStats } from '@/components/attendance/AttendanceStats';
-import { AttendanceTable } from '@/components/attendance/AttendanceTable';
-import { AddStudentDialog } from '@/components/attendance/AddStudentDialog';
-import { DateNavigator } from '@/components/attendance/DateNavigator';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Header } from '@/components/Header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Toaster } from 'sonner';
 import {
-  Search,
-  Download,
-  CheckCheck,
   Globe2,
   Palette,
-  FileCheck2,
   Sparkles,
-  RefreshCw,
   Database,
+  Layers,
+  Code2,
+  Terminal,
+  CheckCircle2,
 } from 'lucide-react';
-import { useAttendanceData } from '@/hooks/useAttendanceData';
-import { getTodayISO } from '@/lib/date';
-import type { AttendanceStatus, CourseType, CreateStudentInput } from '@/types/attendance';
 import { useI18n } from '@/components/i18n/I18nProvider';
 import { m } from '@/paraglide/messages';
 
 export function App() {
-  const [selectedDate, setSelectedDate] = React.useState<string>(getTodayISO());
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedCourse, setSelectedCourse] = React.useState<string>('all');
-  const { locale, isRTL } = useI18n();
-
-  const {
-    students,
-    isLoading,
-    isSyncing,
-    error,
-    updateStatus,
-    addStudent,
-    markAllPresent,
-    refresh,
-  } = useAttendanceData({
-    date: selectedDate,
-  });
-
-  // Status update handler
-  const handleUpdateStatus = (id: string, newStatus: AttendanceStatus) => {
-    updateStatus(id, newStatus, locale);
-  };
-
-  // Add student handler
-  const handleAddStudent = async (newStudent: CreateStudentInput) => {
-    return await addStudent(newStudent);
-  };
-
-  // Mark all present
-  const handleMarkAllPresent = () => {
-    markAllPresent(selectedCourse, locale);
-  };
-
-  // Export handler
-  const handleExport = () => {
-    const headers = ['ID', 'Name (FA)', 'Name (EN)', 'Course', 'Status', 'Time', 'Guardian Phone'];
-    const rows = filteredStudents.map((s) => [
-      s.studentId,
-      s.nameFa,
-      s.nameEn,
-      s.course,
-      s.status,
-      s.checkInTime || '—',
-      s.guardianPhone,
-    ]);
-    const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `bytic-attendance-${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Filter students
-  const filteredStudents = React.useMemo(() => {
-    return students.filter((student) => {
-      const matchesCourse =
-        selectedCourse === 'all' || student.course === (selectedCourse as CourseType);
-      const query = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !query ||
-        student.nameFa.toLowerCase().includes(query) ||
-        student.nameEn.toLowerCase().includes(query) ||
-        student.studentId.toLowerCase().includes(query) ||
-        student.guardianPhone.includes(query);
-
-      return matchesCourse && matchesSearch;
-    });
-  }, [students, selectedCourse, searchQuery]);
+  const { isRTL } = useI18n();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 selection:text-primary transition-colors duration-200">
@@ -107,49 +24,20 @@ export function App() {
       <Header />
 
       {/* Main Content Area */}
-      <main className="container mx-auto max-w-7xl flex-1 px-4 py-6 sm:px-6 space-y-6">
-        {/* Banner / Live Status Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--bytic-navy)] via-[#152e47] to-[var(--bytic-surface)] p-6 text-white shadow-lg border border-primary/20">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md">
-                <span className="h-2 w-2 rounded-full bg-[var(--bytic-green)] animate-pulse"></span>
-                <span>{m.live_session_alert()}</span>
-                {isSyncing && (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-300 ms-2">
-                    <RefreshCw className="h-3 w-3 animate-spin" />
-                    <span>همگام‌سازی با پایگاه داده...</span>
-                  </span>
-                )}
-              </div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight">
-                {m.app_title()}
-              </h1>
-              <p className="text-sm text-slate-300 max-w-2xl">
-                {m.app_subtitle()}
-              </p>
+      <main className="container mx-auto max-w-7xl flex-1 px-4 py-8 sm:px-6 space-y-8">
+        {/* Welcome / Template Status Banner */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--bytic-navy)] via-[#152e47] to-[var(--bytic-surface)] p-6 sm:p-8 text-white shadow-lg border border-primary/20">
+          <div className="relative z-10 space-y-3 max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-[var(--bytic-green)] animate-pulse" />
+              <span>{m.welcome_title()}</span>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <AddStudentDialog onAddStudent={handleAddStudent} />
-              <Button
-                variant="outline"
-                onClick={handleMarkAllPresent}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white cursor-pointer"
-              >
-                <CheckCheck className="h-4 w-4 me-1.5 text-emerald-400" />
-                <span className="text-xs sm:text-sm">حاضر کردن همه</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => refresh()}
-                className="text-white hover:bg-white/20 cursor-pointer h-10 w-10"
-                title="تازه سازی داده ها"
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
+              {m.app_title()}
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              {m.welcome_desc()}
+            </p>
           </div>
 
           {/* Decorative background glow */}
@@ -157,94 +45,30 @@ export function App() {
           <div className="absolute -top-10 -end-10 h-40 w-40 rounded-full bg-[var(--bytic-coral)]/20 blur-3xl pointer-events-none" />
         </div>
 
-        {/* Error notification banner if any */}
-        {error && (
-          <div className="p-3.5 text-xs sm:text-sm bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-xl flex items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">خطا در برقراری ارتباط با پایگاه داده:</span>
-              <span>{error}</span>
+        {/* Feature Development Canvas Placeholder */}
+        <Card className="border-dashed border-2 bg-card/50 shadow-xs">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+                <Terminal className="h-5 w-5 text-primary" />
+                <span>Feature Canvas / بوم توسعه قابلیت‌ها</span>
+              </CardTitle>
+              <Badge variant="secondary" className="gap-1 text-xs">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Clean Slate Ready</span>
+              </Badge>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => refresh()}
-              className="h-7 text-xs px-3 shrink-0 border-rose-500/30 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 cursor-pointer"
-            >
-              <RefreshCw className="h-3 w-3 me-1" />
-              <span>تلاش مجدد</span>
-            </Button>
-          </div>
-        )}
-
-        {/* Attendance Statistics Cards */}
-        <AttendanceStats students={students} isLoading={isLoading} />
-
-        {/* Date Navigator Bar */}
-        <DateNavigator
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          isLoading={isLoading}
-        />
-
-        {/* Filter and Search Controls Bar */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          {/* Course Tabs Filter */}
-          <Tabs
-            value={selectedCourse}
-            onValueChange={setSelectedCourse}
-            className="w-full md:w-auto"
-          >
-            <TabsList className="grid grid-cols-2 sm:flex sm:flex-row w-full h-auto p-1 gap-1">
-              <TabsTrigger value="all" className="text-xs sm:text-sm">
-                {m.filter_all()}
-              </TabsTrigger>
-              <TabsTrigger value="scratch_jr" className="text-xs sm:text-sm">
-                {m.filter_scratch_jr()}
-              </TabsTrigger>
-              <TabsTrigger value="scratch" className="text-xs sm:text-sm">
-                {m.filter_scratch()}
-              </TabsTrigger>
-              <TabsTrigger value="web_design" className="text-xs sm:text-sm">
-                {m.filter_web_design()}
-              </TabsTrigger>
-              <TabsTrigger value="python" className="text-xs sm:text-sm">
-                {m.filter_python()}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          {/* Search Input & Export Button */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="relative flex-1 sm:w-72">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={m.search_placeholder()}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="ps-9 h-10 bg-card"
-              />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              پروژه بازنشانی شد و ساختار دامنه قبلی حذف گردید. اکنون می‌توانید ماژول‌ها و قابلیت‌های جدید را بر روی این بستر توسعه دهید.
+            </p>
+            <div className="p-4 rounded-lg bg-muted/40 border text-xs font-mono text-muted-foreground flex items-center gap-3">
+              <Code2 className="h-4 w-4 text-primary shrink-0" />
+              <span>Extend UI in <code className="text-foreground font-semibold">src/App.tsx</code> and routes in <code className="text-foreground font-semibold">api/_lib/router.ts</code></span>
             </div>
-
-            <Button
-              variant="outline"
-              size="default"
-              onClick={handleExport}
-              className="gap-2 h-10 shrink-0 cursor-pointer"
-              title={m.btn_export()}
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">{m.btn_export()}</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* Attendance Table */}
-        <AttendanceTable
-          students={filteredStudents}
-          isLoading={isLoading}
-          onUpdateStatus={handleUpdateStatus}
-        />
+          </CardContent>
+        </Card>
 
         {/* Architecture & Tech Stack Highlights */}
         <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
@@ -252,7 +76,7 @@ export function App() {
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="h-5 w-5 text-[var(--bytic-green)]" />
               <h2 className="text-base sm:text-lg font-bold">
-                مشخصات فنی و معماری پروژه بایتک / Architecture Highlights
+                {m.stack_overview()}
               </h2>
             </div>
 
@@ -261,7 +85,7 @@ export function App() {
                 <Database className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold block text-foreground">Turso + Prisma ORM</span>
-                  <span className="text-muted-foreground">Serverless SQLite on Vercel with @prisma/adapter-libsql</span>
+                  <span className="text-muted-foreground">LibSQL adapter & SQLite support</span>
                 </div>
               </div>
 
@@ -269,23 +93,23 @@ export function App() {
                 <Globe2 className="h-5 w-5 text-sky-500 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold block text-foreground">Paraglide i18n + RTL First</span>
-                  <span className="text-muted-foreground">CSS Logical Properties (Zero hardcoded rtl/ltr variants)</span>
+                  <span className="text-muted-foreground">CSS Logical Properties (Zero hardcoded dir)</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-lg bg-background border">
                 <Palette className="h-5 w-5 text-rose-500 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block text-foreground">Bytic.ir Color Palette</span>
-                  <span className="text-muted-foreground">Green #35b40e, Coral #fb4364, Dark Navy #0e2338</span>
+                  <span className="font-bold block text-foreground">Bytic Color Palette</span>
+                  <span className="text-muted-foreground">Brand Green, Coral, and Dark Navy</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-lg bg-background border">
-                <FileCheck2 className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <Layers className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block text-foreground">OpenSpec SDD</span>
-                  <span className="text-muted-foreground">Change specification & task verification</span>
+                  <span className="font-bold block text-foreground">Radix UI & Tailwind v4</span>
+                  <span className="text-muted-foreground">15 Accessible UI Primitives</span>
                 </div>
               </div>
             </div>
@@ -297,7 +121,7 @@ export function App() {
       <footer className="border-t bg-card py-6 mt-12 text-center text-xs sm:text-sm text-muted-foreground">
         <div className="container mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-foreground">Bytic Attendance System</span>
+            <span className="font-bold text-foreground">{m.app_title()}</span>
             <span>—</span>
             <span>{m.powered_by()}</span>
           </div>
@@ -322,4 +146,5 @@ export function App() {
     </div>
   );
 }
+
 export default App;
