@@ -1,0 +1,29 @@
+﻿services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bytic-attendance
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=file:/data/attendance.db
+      - AUTO_SEED=${AUTO_SEED:-false}
+      # Optional Turso configuration (if using remote Turso database):
+      # - TURSO_DATABASE_URL=${TURSO_DATABASE_URL}
+      # - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
+    volumes:
+      - attendance_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  attendance_data:
+    name: attendance_data

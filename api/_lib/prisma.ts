@@ -28,6 +28,31 @@ function createPrismaClient(): PrismaClient {
     return new PrismaClient({ adapter });
   }
 
+  const databaseUrl = process.env.DATABASE_URL;
+  if (databaseUrl) {
+    if (databaseUrl.startsWith('file:')) {
+      const rawPath = databaseUrl.slice(5);
+      const cleanPath = rawPath.replace(/\\/g, '/');
+      const resolvedPath = path.isAbsolute(cleanPath)
+        ? cleanPath
+        : path.resolve(process.cwd(), cleanPath.replace(/^\.\//, '')).replace(/\\/g, '/');
+      
+      const adapter = new PrismaLibSQL({
+        url: `file:${resolvedPath}`,
+      });
+      return new PrismaClient({ adapter });
+    }
+
+    // Direct HTTP / libSQL / sqld URL
+    if (databaseUrl.startsWith('http:') || databaseUrl.startsWith('https:') || databaseUrl.startsWith('libsql:')) {
+      const adapter = new PrismaLibSQL({
+        url: databaseUrl,
+        authToken: process.env.DATABASE_AUTH_TOKEN || tursoAuthToken,
+      });
+      return new PrismaClient({ adapter });
+    }
+  }
+
   // Local fallback: resolve file path to absolute path for libSQL adapter
   const dbPath = path.resolve(process.cwd(), 'prisma', 'dev.db').replace(/\\/g, '/');
   const adapter = new PrismaLibSQL({
