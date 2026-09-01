@@ -1,165 +1,176 @@
-import * as React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { toast } from 'sonner';
+import { getTodayISO } from '@/lib/date';
 import type {
   Student,
   AttendanceStatus,
   CreateStudentInput,
-  CourseType,
 } from '@/types/attendance';
-import { initialStudents } from '@/data/mockStudents';
 
-export function useAttendanceData() {
-  const [students, setStudents] = React.useState<Student[]>(initialStudents);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
-  const [isSyncing, setIsSyncing] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | null>(null);
+interface UseAttendanceDataOptions {
+  date?: string;
+  course?: string;
+  search?: string;
+}
 
-  // Initial fetch from API
-  const fetchStudents = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await api.getStudents();
-      setStudents(data);
-    } catch (err) {
-      console.warn('Backend fetch failed, falling back to local state:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch attendance data');
-      // Keep initialStudents as fallback for smooth offline UX
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+export function useAttendanceData(options: UseAttendanceDataOptions = {}) {
+  const queryClient = useQueryClient();
+  const date = options.date || getTodayISO();
+  const course = options.course;
+  const search = options.search;
 
-  React.useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]);
+  const queryKey = ['students', { date, course, search }];
 
-  // Optimistic update status
-  const updateStatus = React.useCallback(
-    async (id: string, newStatus: AttendanceStatus, locale: string = 'fa') => {
-      const now = new Date().toLocaleTimeString(locale === 'fa' ? 'fa-IR' : 'en-US', {
+  // 1. Query for students with attendance on the specified date
+  const {
+    data: students = [],
+    isLoading,
+    isFetching,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: () => api.getStudents({ date, course, search }),
+  });
+
+  // 2. Mutation for updating single student status
+  const updateStatusMutation = useMutation({
+    mutationFn: (vars: { id: string; status: AttendanceStatus; locale?: string }) =>
+      api.updateAttendance({
+        studentId: vars.id,
+        status: vars.status,
+        date,
+      }),
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousStudents = queryClient.getQueryData<Student[]>(queryKey) || [];
+
+      const now = new Date().toLocaleTimeString(vars.locale === 'fa' ? 'fa-IR' : 'en-US', {
         hour: '2-digit',
         minute: '2-digit',
       });
 
-      let previousStudent: Student | undefined;
-
-      // Optimistic update
-      setStudents((prev) => {
-        return prev.map((student) => {
-          if (student.id !== id && student.studentId !== id) return student;
-          previousStudent = student;
+      queryClient.setQueryData<Student[]>(queryKey, (old = []) =>
+        old.map((student) => {
+          if (student.id !== vars.id && student.studentId !== vars.id) return student;
           return {
             ...student,
-            status: newStatus,
+            status: vars.status,
             checkInTime:
-              newStatus === 'present' || newStatus === 'late'
+              vars.status === 'present' || vars.status === 'late'
                 ? student.checkInTime || now
                 : undefined,
           };
-        });
+        })
+      );
+
+      return { previousStudents };
+    },
+    onError: (err, _vars, context) => {
+      if (context?.previousStudents) {
+        queryClient.setQueryData(queryKey, context.previousStudents);
+      }
+      toast.error('خطا در ذخیره وضعیت / Error saving status', {
+        description: err instanceof Error ? err.message : 'Failed to update attendance',
       });
-
-      try {
-        setIsSyncing(true);
-        await api.updateAttendance({
-          studentId: id,
-          status: newStatus,
-        });
-      } catch (err) {
-        console.error('Failed to sync status update to backend:', err);
-        // Rollback on error
-        if (previousStudent) {
-          setStudents((prev) =>
-            prev.map((s) => (s.id === id || s.studentId === id ? previousStudent! : s))
-          );
-        }
-        setError(err instanceof Error ? err.message : 'Failed to sync update');
-      } finally {
-        setIsSyncing(false);
-      }
     },
-    []
-  );
-
-  // Add student
-  const addStudent = React.useCallback(
-    async (newStudent: CreateStudentInput) => {
-      try {
-        setIsSyncing(true);
-        const created = await api.createStudent(newStudent);
-        setStudents((prev) => [created, ...prev]);
-        return created;
-      } catch (err) {
-        console.error('Failed to create student on backend:', err);
-        // Optimistic local fallback if API fails
-        const fallback: Student = {
-          id: String(Date.now()),
-          studentId: newStudent.studentId || `BYT-${Math.floor(1000 + Math.random() * 9000)}`,
-          nameFa: newStudent.nameFa,
-          nameEn: newStudent.nameEn,
-          course: newStudent.course as CourseType,
-          guardianPhone: newStudent.guardianPhone,
-          avatarUrl: newStudent.avatarUrl,
-          status: 'absent',
-        };
-        setStudents((prev) => [fallback, ...prev]);
-        setError(err instanceof Error ? err.message : 'Created offline');
-        return fallback;
-      } finally {
-        setIsSyncing(false);
-      }
+    onSuccess: (_, vars) => {
+      const statusLabels: Record<AttendanceStatus, string> = {
+        present: 'حاضر',
+        absent: 'غایب',
+        late: 'با تاخیر',
+        justified: 'موجه',
+      };
+      toast.success(`وضعیت تغییر یافت: ${statusLabels[vars.status]}`, {
+        duration: 2000,
+      });
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
     },
-    []
-  );
+  });
 
-  // Mark all present
-  const markAllPresent = React.useCallback(
-    async (selectedCourse: string = 'all', locale: string = 'fa') => {
-      const now = new Date().toLocaleTimeString(locale === 'fa' ? 'fa-IR' : 'en-US', {
+  // 3. Mutation for creating a new student
+  const addStudentMutation = useMutation({
+    mutationFn: (newStudent: CreateStudentInput) => api.createStudent(newStudent),
+    onSuccess: (created) => {
+      toast.success(`دانش‌آموز «${created.nameFa}» با موفقیت اضافه شد`, {
+        duration: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+    },
+    onError: (err) => {
+      toast.error('خطا در ثبت دانش‌آموز جدید', {
+        description: err instanceof Error ? err.message : 'Failed to create student',
+      });
+    },
+  });
+
+  // 4. Mutation for marking all present
+  const markAllPresentMutation = useMutation({
+    mutationFn: (vars?: { course?: string; locale?: string }) =>
+      api.markAllPresent({
+        date,
+        course: vars?.course === 'all' ? undefined : vars?.course,
+      }),
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousStudents = queryClient.getQueryData<Student[]>(queryKey) || [];
+
+      const now = new Date().toLocaleTimeString(vars?.locale === 'fa' ? 'fa-IR' : 'en-US', {
         hour: '2-digit',
         minute: '2-digit',
       });
 
-      const previousStudents = [...students];
-
-      // Optimistic update
-      setStudents((prev) =>
-        prev.map((s) => {
-          if (selectedCourse !== 'all' && s.course !== selectedCourse) return s;
+      queryClient.setQueryData<Student[]>(queryKey, (old = []) =>
+        old.map((s) => {
+          if (vars?.course && vars.course !== 'all' && s.course !== vars.course) return s;
           return {
             ...s,
-            status: 'present',
+            status: 'present' as AttendanceStatus,
             checkInTime: s.checkInTime || now,
           };
         })
       );
 
-      try {
-        setIsSyncing(true);
-        await api.markAllPresent({
-          course: selectedCourse === 'all' ? undefined : selectedCourse,
-        });
-      } catch (err) {
-        console.error('Failed to sync mark all present:', err);
-        // Rollback
-        setStudents(previousStudents);
-        setError(err instanceof Error ? err.message : 'Failed to mark all present');
-      } finally {
-        setIsSyncing(false);
-      }
+      return { previousStudents };
     },
-    [students]
-  );
+    onError: (err, _vars, context) => {
+      if (context?.previousStudents) {
+        queryClient.setQueryData(queryKey, context.previousStudents);
+      }
+      toast.error('خطا در تغییر وضعیت گروهی', {
+        description: err instanceof Error ? err.message : 'Failed to mark all present',
+      });
+    },
+    onSuccess: (res) => {
+      toast.success(`تمام دانش‌آموزان (${res.updatedCount} نفر) حاضر شدند`, {
+        duration: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+    },
+  });
+
+  const isSyncing =
+    updateStatusMutation.isPending ||
+    addStudentMutation.isPending ||
+    markAllPresentMutation.isPending;
+
+  const error = queryError ? (queryError instanceof Error ? queryError.message : String(queryError)) : null;
 
   return {
     students,
-    isLoading,
+    isLoading: isLoading || isFetching,
     isSyncing,
     error,
-    updateStatus,
-    addStudent,
-    markAllPresent,
-    refresh: fetchStudents,
+    updateStatus: (id: string, newStatus: AttendanceStatus, locale: string = 'fa') =>
+      updateStatusMutation.mutateAsync({ id, status: newStatus, locale }),
+    addStudent: (newStudent: CreateStudentInput) =>
+      addStudentMutation.mutateAsync(newStudent),
+    markAllPresent: (selectedCourse: string = 'all', locale: string = 'fa') =>
+      markAllPresentMutation.mutateAsync({ course: selectedCourse, locale }),
+    refresh: () => refetch(),
   };
 }

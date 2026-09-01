@@ -11,12 +11,19 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { UserPlus } from 'lucide-react';
 import { m } from '@/paraglide/messages';
 import type { CourseType, CreateStudentInput } from '@/types/attendance';
 
 interface AddStudentDialogProps {
-  onAddStudent: (student: CreateStudentInput) => void;
+  onAddStudent: (student: CreateStudentInput) => Promise<unknown> | void;
 }
 
 export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
@@ -26,28 +33,38 @@ export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
   const [studentId, setStudentId] = React.useState('');
   const [course, setCourse] = React.useState<CourseType>('scratch_jr');
   const [guardianPhone, setGuardianPhone] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [formError, setFormError] = React.useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameFa || !studentId) return;
 
-    onAddStudent({
-      nameFa,
-      nameEn: nameEn || nameFa,
-      studentId,
-      course,
-      guardianPhone: guardianPhone || '09120000000',
-    });
+    try {
+      setIsSubmitting(true);
+      setFormError(null);
+      await onAddStudent({
+        nameFa,
+        nameEn: nameEn || nameFa,
+        studentId,
+        course,
+        guardianPhone: guardianPhone || '09120000000',
+      });
 
-    setNameFa('');
-    setNameEn('');
-    setStudentId('');
-    setGuardianPhone('');
-    setOpen(false);
+      setNameFa('');
+      setNameEn('');
+      setStudentId('');
+      setGuardianPhone('');
+      setOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'خطا در ثبت دانش‌آموز');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) setFormError(null); }}>
       <DialogTrigger asChild>
         <Button className="bg-[var(--bytic-green)] hover:opacity-90 text-white shadow-sm gap-2 cursor-pointer select-none">
           <UserPlus className="h-4 w-4" />
@@ -62,6 +79,12 @@ export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
               اطلاعات دانش‌آموز جدید را جهت ثبت در سامانه بایتک وارد کنید.
             </DialogDescription>
           </DialogHeader>
+
+          {formError && (
+            <div className="mt-2 p-2.5 text-xs bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-md">
+              {formError}
+            </div>
+          )}
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -113,17 +136,20 @@ export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
 
             <div className="grid gap-2">
               <Label htmlFor="course">{m.course_label()}</Label>
-              <select
-                id="course"
+              <Select
                 value={course}
-                onChange={(e) => setCourse(e.target.value as CourseType)}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-start cursor-pointer"
+                onValueChange={(val) => setCourse(val as CourseType)}
               >
-                <option value="scratch_jr">{m.filter_scratch_jr()}</option>
-                <option value="scratch">{m.filter_scratch()}</option>
-                <option value="web_design">{m.filter_web_design()}</option>
-                <option value="python">{m.filter_python()}</option>
-              </select>
+                <SelectTrigger id="course" className="w-full">
+                  <SelectValue placeholder={m.course_label()} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="scratch_jr">{m.filter_scratch_jr()}</SelectItem>
+                  <SelectItem value="scratch">{m.filter_scratch()}</SelectItem>
+                  <SelectItem value="web_design">{m.filter_web_design()}</SelectItem>
+                  <SelectItem value="python">{m.filter_python()}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -132,14 +158,16 @@ export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              disabled={isSubmitting}
             >
               {m.btn_cancel()}
             </Button>
             <Button
               type="submit"
-              className="bg-[var(--bytic-green)] hover:opacity-90 text-white"
+              disabled={isSubmitting}
+              className="bg-[var(--bytic-green)] hover:opacity-90 text-white cursor-pointer"
             >
-              {m.btn_save()}
+              {isSubmitting ? 'در حال ذخیره...' : m.btn_save()}
             </Button>
           </DialogFooter>
         </form>

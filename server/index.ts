@@ -1,11 +1,8 @@
-﻿import http from 'node:http';
+import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { applySecurityHeaders, handleCors, logRequest } from './middlewares.js';
-import studentsHandler from '../api/students/index.js';
-import attendanceHandler from '../api/attendance/index.js';
-import markAllHandler from '../api/attendance/mark-all.js';
-import statsHandler from '../api/stats.js';
+import { apiRouter } from '../api/_lib/router.js';
 import { prisma } from '../api/_lib/prisma.js';
 
 // MIME types dictionary for static file serving
@@ -83,50 +80,10 @@ async function requestHandler(req: http.IncomingMessage, res: http.ServerRespons
     logRequest(req, res.statusCode, performance.now() - start);
   });
 
-  // 1. Healthcheck endpoints
-  if (pathname === '/health' || pathname === '/api/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        status: 'ok',
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString(),
-      })
-    );
-    return;
-  }
-
-  // 2. API Routes
-  if (pathname.startsWith('/api/')) {
-    try {
-      if (pathname === '/api/students' || pathname === '/api/students/') {
-        return await studentsHandler(req, res);
-      }
-      if (pathname === '/api/attendance' || pathname === '/api/attendance/') {
-        return await attendanceHandler(req, res);
-      }
-      if (pathname === '/api/attendance/mark-all' || pathname === '/api/attendance/mark-all/') {
-        return await markAllHandler(req, res);
-      }
-      if (pathname === '/api/stats' || pathname === '/api/stats/') {
-        return await statsHandler(req, res);
-      }
-
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: `API route ${pathname} not found` }));
-    } catch (error) {
-      console.error(`API Error on ${pathname}:`, error);
-      if (!res.headersSent) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            error: error instanceof Error ? error.message : 'Internal Server Error',
-          })
-        );
-      }
-    }
-    return;
+  // 1. API Routes & Health Checks via Unified Router
+  if (pathname.startsWith('/api/') || pathname === '/health') {
+    const handled = await apiRouter.handle(req, res);
+    if (handled) return;
   }
 
   // 3. Static Assets & SPA Client-Side Routing

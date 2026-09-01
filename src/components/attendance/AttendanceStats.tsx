@@ -1,13 +1,38 @@
 import { Users, UserCheck, UserX, Clock, Activity } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { m } from '@/paraglide/messages';
 import type { Student } from '@/types/attendance';
 
 interface AttendanceStatsProps {
   students: Student[];
+  isLoading?: boolean;
 }
 
-export function AttendanceStats({ students }: AttendanceStatsProps) {
+export function AttendanceStats({ students, isLoading = false }: AttendanceStatsProps) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-4">
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <Card key={idx} className="border border-primary/10 bg-card/60">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+              <div className="mt-3">
+                <Skeleton className="h-7 w-12" />
+              </div>
+              <div className="mt-2">
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   const total = students.length;
   const present = students.filter((s) => s.status === 'present').length;
   const absent = students.filter((s) => s.status === 'absent').length;

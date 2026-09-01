@@ -9,41 +9,30 @@ function apiDevPlugin(): Plugin {
     name: 'api-dev-server',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (!req.url?.startsWith('/api')) {
+        if (!req.url?.startsWith('/api') && req.url !== '/health') {
           return next();
         }
 
-        const parsedUrl = new URL(req.url, 'http://localhost');
-        const pathname = parsedUrl.pathname;
-
         try {
-          let modulePath = '';
-          if (pathname === '/api/students' || pathname === '/api/students/') {
-            modulePath = '/api/students/index.ts';
-          } else if (pathname === '/api/attendance' || pathname === '/api/attendance/') {
-            modulePath = '/api/attendance/index.ts';
-          } else if (pathname === '/api/attendance/mark-all' || pathname === '/api/attendance/mark-all/') {
-            modulePath = '/api/attendance/mark-all.ts';
-          } else if (pathname === '/api/stats' || pathname === '/api/stats/') {
-            modulePath = '/api/stats.ts';
+          const routerPath = path.resolve(process.cwd(), './api/_lib/router.ts');
+          const mod = await server.ssrLoadModule(routerPath);
+          if (mod.apiRouter && typeof mod.apiRouter.handle === 'function') {
+            const handled = await mod.apiRouter.handle(req, res);
+            if (handled) return;
           }
-
-          if (modulePath) {
-            const absolutePath = path.resolve(process.cwd(), `.${modulePath}`);
-            const mod = await server.ssrLoadModule(absolutePath);
-            if (mod.default && typeof mod.default === 'function') {
-              return await mod.default(req, res);
-            }
-          }
-
-          res.statusCode = 404;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ success: false, error: `API route ${pathname} not found` }));
+          next();
         } catch (err) {
           console.error('API Dev Server error:', err);
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }));
+          if (!res.headersSent) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(
+              JSON.stringify({
+                success: false,
+                error: err instanceof Error ? err.message : String(err),
+              })
+            );
+          }
         }
       });
     },

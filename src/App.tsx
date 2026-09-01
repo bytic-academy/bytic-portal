@@ -3,11 +3,13 @@ import { Header } from '@/components/attendance/Header';
 import { AttendanceStats } from '@/components/attendance/AttendanceStats';
 import { AttendanceTable } from '@/components/attendance/AttendanceTable';
 import { AddStudentDialog } from '@/components/attendance/AddStudentDialog';
+import { DateNavigator } from '@/components/attendance/DateNavigator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Toaster } from 'sonner';
 import {
   Search,
   Download,
@@ -20,11 +22,17 @@ import {
   Database,
 } from 'lucide-react';
 import { useAttendanceData } from '@/hooks/useAttendanceData';
+import { getTodayISO } from '@/lib/date';
 import type { AttendanceStatus, CourseType, CreateStudentInput } from '@/types/attendance';
 import { useI18n } from '@/components/i18n/I18nProvider';
 import { m } from '@/paraglide/messages';
 
 export function App() {
+  const [selectedDate, setSelectedDate] = React.useState<string>(getTodayISO());
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCourse, setSelectedCourse] = React.useState<string>('all');
+  const { locale, isRTL } = useI18n();
+
   const {
     students,
     isLoading,
@@ -34,11 +42,9 @@ export function App() {
     addStudent,
     markAllPresent,
     refresh,
-  } = useAttendanceData();
-
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedCourse, setSelectedCourse] = React.useState<string>('all');
-  const { locale, isRTL } = useI18n();
+  } = useAttendanceData({
+    date: selectedDate,
+  });
 
   // Status update handler
   const handleUpdateStatus = (id: string, newStatus: AttendanceStatus) => {
@@ -46,8 +52,8 @@ export function App() {
   };
 
   // Add student handler
-  const handleAddStudent = (newStudent: CreateStudentInput) => {
-    addStudent(newStudent);
+  const handleAddStudent = async (newStudent: CreateStudentInput) => {
+    return await addStudent(newStudent);
   };
 
   // Mark all present
@@ -153,16 +159,32 @@ export function App() {
 
         {/* Error notification banner if any */}
         {error && (
-          <div className="p-3 text-xs bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-between">
-            <span>توجه: {error} (داده‌ها به صورت محلی در دسترس هستند)</span>
-            <Button size="sm" variant="ghost" onClick={() => refresh()} className="h-6 text-xs px-2">
-              تلاش مجدد
+          <div className="p-3.5 text-xs sm:text-sm bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-xl flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">خطا در برقراری ارتباط با پایگاه داده:</span>
+              <span>{error}</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refresh()}
+              className="h-7 text-xs px-3 shrink-0 border-rose-500/30 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 cursor-pointer"
+            >
+              <RefreshCw className="h-3 w-3 me-1" />
+              <span>تلاش مجدد</span>
             </Button>
           </div>
         )}
 
         {/* Attendance Statistics Cards */}
-        <AttendanceStats students={students} />
+        <AttendanceStats students={students} isLoading={isLoading} />
+
+        {/* Date Navigator Bar */}
+        <DateNavigator
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          isLoading={isLoading}
+        />
 
         {/* Filter and Search Controls Bar */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -220,6 +242,7 @@ export function App() {
         {/* Attendance Table */}
         <AttendanceTable
           students={filteredStudents}
+          isLoading={isLoading}
           onUpdateStatus={handleUpdateStatus}
         />
 
@@ -288,6 +311,14 @@ export function App() {
           </div>
         </div>
       </footer>
+
+      {/* Global Toast Notification System */}
+      <Toaster
+        dir={isRTL ? 'rtl' : 'ltr'}
+        position={isRTL ? 'top-left' : 'top-right'}
+        richColors
+        closeButton
+      />
     </div>
   );
 }

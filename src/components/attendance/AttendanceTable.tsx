@@ -1,4 +1,4 @@
-import { Check, X, Clock, AlertCircle, MoreHorizontal, Phone, CheckCircle2 } from 'lucide-react';
+import { Check, X, Clock, AlertCircle, MoreHorizontal, Phone, CheckCircle2, Users, Terminal } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,11 +25,13 @@ import type { Student, AttendanceStatus, CourseType } from '@/types/attendance';
 
 interface AttendanceTableProps {
   students: Student[];
+  isLoading?: boolean;
   onUpdateStatus: (id: string, newStatus: AttendanceStatus) => void;
 }
 
 export function AttendanceTable({
   students,
+  isLoading = false,
   onUpdateStatus,
 }: AttendanceTableProps) {
   const { locale } = useI18n();
@@ -103,10 +106,58 @@ export function AttendanceTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {students.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, idx) => (
+              <TableRow key={idx}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                    <div className="flex flex-col gap-1.5">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-12" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </TableCell>
+                <TableCell className="text-end">
+                  <div className="flex items-center justify-end gap-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : students.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                دانش‌آموزی با این مشخصات یافت نشد. / No students found.
+              <TableCell colSpan={6} className="py-12 text-center">
+                <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-base text-foreground">
+                      دانش‌آموزی یافت نشد / No Students Found
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                      هیچ رکوردی در پایگاه داده یا فیلتر جاری وجود ندارد. برای ایجاد دانش‌آموز از دکمه «افزودن دانش‌آموز» استفاده کنید یا در ترمینال دستور زیر را اجرا کنید:
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 border text-xs font-mono text-foreground" dir="ltr">
+                    <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>npm run db:seed</span>
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
