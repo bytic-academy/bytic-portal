@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useI18n } from '@/components/i18n/I18nProvider';
 import { m } from '@/paraglide/messages';
-import type { Student, AttendanceStatus, CourseType } from '@/data/mockStudents';
+import type { Student, AttendanceStatus, CourseType } from '@/types/attendance';
 
 interface AttendanceTableProps {
   students: Student[];

@@ -12,63 +12,47 @@ import {
   Search,
   Download,
   CheckCheck,
-  Code2,
   Globe2,
   Palette,
   FileCheck2,
   Sparkles,
+  RefreshCw,
+  Database,
 } from 'lucide-react';
-import { initialStudents, type Student, type AttendanceStatus, type CourseType } from '@/data/mockStudents';
+import { useAttendanceData } from '@/hooks/useAttendanceData';
+import type { AttendanceStatus, CourseType, CreateStudentInput } from '@/types/attendance';
 import { useI18n } from '@/components/i18n/I18nProvider';
 import { m } from '@/paraglide/messages';
 
 export function App() {
-  const [students, setStudents] = React.useState<Student[]>(initialStudents);
+  const {
+    students,
+    isLoading,
+    isSyncing,
+    error,
+    updateStatus,
+    addStudent,
+    markAllPresent,
+    refresh,
+  } = useAttendanceData();
+
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedCourse, setSelectedCourse] = React.useState<string>('all');
   const { locale, isRTL } = useI18n();
 
   // Status update handler
   const handleUpdateStatus = (id: string, newStatus: AttendanceStatus) => {
-    const now = new Date().toLocaleTimeString(locale === 'fa' ? 'fa-IR' : 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    setStudents((prev) =>
-      prev.map((student) => {
-        if (student.id !== id) return student;
-        return {
-          ...student,
-          status: newStatus,
-          checkInTime: newStatus === 'present' || newStatus === 'late' ? now : undefined,
-        };
-      })
-    );
+    updateStatus(id, newStatus, locale);
   };
 
   // Add student handler
-  const handleAddStudent = (newStudent: Omit<Student, 'id'>) => {
-    const student: Student = {
-      ...newStudent,
-      id: String(Date.now()),
-    };
-    setStudents((prev) => [student, ...prev]);
+  const handleAddStudent = (newStudent: CreateStudentInput) => {
+    addStudent(newStudent);
   };
 
   // Mark all present
   const handleMarkAllPresent = () => {
-    const now = new Date().toLocaleTimeString(locale === 'fa' ? 'fa-IR' : 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    setStudents((prev) =>
-      prev.map((s) => ({
-        ...s,
-        status: 'present',
-        checkInTime: s.checkInTime || now,
-      }))
-    );
+    markAllPresent(selectedCourse, locale);
   };
 
   // Export handler
@@ -125,6 +109,12 @@ export function App() {
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-[var(--bytic-green)] animate-pulse"></span>
                 <span>{m.live_session_alert()}</span>
+                {isSyncing && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-300 ms-2">
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    <span>همگام‌سازی با پایگاه داده...</span>
+                  </span>
+                )}
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight">
                 {m.app_title()}
@@ -144,6 +134,15 @@ export function App() {
                 <CheckCheck className="h-4 w-4 me-1.5 text-emerald-400" />
                 <span className="text-xs sm:text-sm">حاضر کردن همه</span>
               </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => refresh()}
+                className="text-white hover:bg-white/20 cursor-pointer h-10 w-10"
+                title="تازه سازی داده ها"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
           </div>
 
@@ -151,6 +150,16 @@ export function App() {
           <div className="absolute -bottom-10 -start-10 h-40 w-40 rounded-full bg-[var(--bytic-green)]/20 blur-3xl pointer-events-none" />
           <div className="absolute -top-10 -end-10 h-40 w-40 rounded-full bg-[var(--bytic-coral)]/20 blur-3xl pointer-events-none" />
         </div>
+
+        {/* Error notification banner if any */}
+        {error && (
+          <div className="p-3 text-xs bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-between">
+            <span>توجه: {error} (داده‌ها به صورت محلی در دسترس هستند)</span>
+            <Button size="sm" variant="ghost" onClick={() => refresh()} className="h-6 text-xs px-2">
+              تلاش مجدد
+            </Button>
+          </div>
+        )}
 
         {/* Attendance Statistics Cards */}
         <AttendanceStats students={students} />
@@ -226,15 +235,15 @@ export function App() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs sm:text-sm">
               <div className="flex items-start gap-3 p-3 rounded-lg bg-background border">
-                <Code2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <Database className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block text-foreground">React 19 & Vite 6</span>
-                  <span className="text-muted-foreground">TypeScript Strict, Fast HMR, ESM bundling</span>
+                  <span className="font-bold block text-foreground">Turso + Prisma ORM</span>
+                  <span className="text-muted-foreground">Serverless SQLite on Vercel with @prisma/adapter-libsql</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-lg bg-background border">
-                <Globe2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                <Globe2 className="h-5 w-5 text-sky-500 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold block text-foreground">Paraglide i18n + RTL First</span>
                   <span className="text-muted-foreground">CSS Logical Properties (Zero hardcoded rtl/ltr variants)</span>
@@ -250,10 +259,10 @@ export function App() {
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-lg bg-background border">
-                <FileCheck2 className="h-5 w-5 text-sky-500 shrink-0 mt-0.5" />
+                <FileCheck2 className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block text-foreground">OpenSpec SDD Skills</span>
-                  <span className="text-muted-foreground">Integrated inside <code>.agents/skills/</code> and <code>openspec/</code></span>
+                  <span className="font-bold block text-foreground">OpenSpec SDD</span>
+                  <span className="text-muted-foreground">Change specification & task verification</span>
                 </div>
               </div>
             </div>

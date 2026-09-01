@@ -1,7 +1,7 @@
 import { Users, UserCheck, UserX, Clock, Activity } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { m } from '@/paraglide/messages';
-import type { Student } from '@/data/mockStudents';
+import type { Student } from '@/types/attendance';
 
 interface AttendanceStatsProps {
   students: Student[];

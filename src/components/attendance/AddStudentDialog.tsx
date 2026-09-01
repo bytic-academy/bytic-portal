@@ -13,10 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserPlus } from 'lucide-react';
 import { m } from '@/paraglide/messages';
-import type { Student, CourseType } from '@/data/mockStudents';
+import type { CourseType, CreateStudentInput } from '@/types/attendance';
 
 interface AddStudentDialogProps {
-  onAddStudent: (student: Omit<Student, 'id'>) => void;
+  onAddStudent: (student: CreateStudentInput) => void;
 }
 
 export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
@@ -37,11 +37,6 @@ export function AddStudentDialog({ onAddStudent }: AddStudentDialogProps) {
       studentId,
       course,
       guardianPhone: guardianPhone || '09120000000',
-      status: 'present',
-      checkInTime: new Date().toLocaleTimeString('fa-IR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
     });
 
     setNameFa('');
