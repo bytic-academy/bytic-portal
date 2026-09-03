@@ -6,6 +6,12 @@ import {
   formatJalaliFull,
   formatJalaliShort,
   formatLocalizedDate,
+  formatJalaliMedium,
+  formatLocalizedTime,
+  formatLocalizedDateTime,
+  getJalaliTodayDetails,
+  parseJalaliToISO,
+  calculateAge,
   addDaysToISODate,
   parseISODate,
   formatDateToISO,
@@ -50,14 +56,56 @@ describe('Date & Solar Hijri (Jalali) Conversion Engine', () => {
     expect(formatted).toContain('۱۴۰۵');
   });
 
-  it('formats short Jalali date string', () => {
+  it('formats medium and short Jalali date strings', () => {
+    const medium = formatJalaliMedium('2026-09-01');
+    expect(medium).toBe('۱۰ شهریور ۱۴۰۵');
+
     const formatted = formatJalaliShort('2026-09-01');
     expect(formatted).toBe('۱۴۰۵/۰۶/۱۰');
   });
 
-  it('formats localized date according to language locale', () => {
+  it('formats 24h time with Persian numerals', () => {
+    expect(formatLocalizedTime('10:30')).toBe('۱۰:۳۰');
+    expect(formatLocalizedTime('08:00:00')).toBe('۰۸:۰۰');
+    expect(formatLocalizedTime('')).toBe('');
+  });
+
+  it('formats ISO UTC timestamps to localized Jalali date and time', () => {
+    const utcIso = '2026-09-01T10:30:00.000Z';
+    const formatted = formatLocalizedDateTime(utcIso);
+    expect(formatted).toContain('شهریور');
+    expect(formatted).toContain('۱۴۰۵');
+    expect(formatted).toContain('ساعت');
+  });
+
+  it('provides detailed Jalali today information', () => {
+    const todayDetails = getJalaliTodayDetails();
+    expect(todayDetails.jy).toBeGreaterThan(1400);
+    expect(todayDetails.jm).toBeGreaterThanOrEqual(1);
+    expect(todayDetails.jm).toBeLessThanOrEqual(12);
+    expect(todayDetails.fullFormatted).toContain(todayDetails.monthName);
+  });
+
+  it('parses Jalali date string back to ISO Gregorian correctly', () => {
+    expect(parseJalaliToISO('1405/06/10')).toBe('2026-09-01');
+    expect(parseJalaliToISO('۱۴۰۵/۰۶/۱۰')).toBe('2026-09-01');
+    expect(parseJalaliToISO('1405-01-01')).toBe('2026-03-21');
+    expect(parseJalaliToISO('invalid-date')).toBeNull();
+  });
+
+  it('calculates student age correctly from ISO birthdate', () => {
+    const age = calculateAge('2010-01-01');
+    expect(typeof age).toBe('number');
+    expect(age).toBeGreaterThanOrEqual(14);
+    expect(calculateAge('')).toBeNull();
+  });
+
+  it('formats localized date according to language locale and style', () => {
     const faDate = formatLocalizedDate('2026-09-01', 'fa');
     expect(faDate).toContain('شهریور');
+
+    const faMedium = formatLocalizedDate('2026-09-01', 'fa', 'medium');
+    expect(faMedium).toBe('۱۰ شهریور ۱۴۰۵');
 
     const enDate = formatLocalizedDate('2026-09-01', 'en');
     expect(enDate).toContain('September');

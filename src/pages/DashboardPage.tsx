@@ -7,10 +7,12 @@ import {
   School,
   Users,
   CalendarCheck,
+  Calendar,
   ArrowUpRight,
   Sparkles,
 } from 'lucide-react';
 import { m } from '@/paraglide/messages';
+import { getJalaliTodayDetails } from '@/lib/date';
 
 interface DashboardPageProps {
   onNavigate: (tab: string) => void;
@@ -21,6 +23,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const { data: courses = [] } = useCourses();
   const { data: classes = [] } = useClasses();
   const { data: students = [] } = useStudents();
+  const todayDetails = getJalaliTodayDetails();
 
   const totalSessions = classes.reduce((sum, c) => sum + (c._count?.sessions || 0), 0);
 
@@ -28,10 +31,16 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
     <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--bytic-navy)] via-[#152e47] to-[var(--bytic-surface)] p-6 sm:p-8 text-white shadow-lg border border-primary/20">
-        <div className="relative z-10 space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-[var(--bytic-green)]" />
-            <span>خوش آمدید، {user?.name}</span>
+        <div className="relative z-10 space-y-3 max-w-2xl">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md">
+              <Sparkles className="h-3.5 w-3.5 text-[var(--bytic-green)]" />
+              <span>خوش آمدید، {user?.name}</span>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-md text-slate-200 border border-white/10">
+              <Calendar className="h-3.5 w-3.5 text-amber-400" />
+              <span>امروز: {todayDetails.fullFormatted}</span>
+            </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
             {m.welcome_title()}

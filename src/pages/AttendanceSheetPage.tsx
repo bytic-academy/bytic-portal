@@ -19,6 +19,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
+import {
+  formatJalaliFull,
+  formatLocalizedTime,
+  toPersianDigits,
+} from '@/lib/date';
 
 interface AttendanceSheetPageProps {
   sessionId: string;
@@ -143,7 +148,7 @@ export function AttendanceSheetPage({
             <Calendar className="h-5 w-5 text-primary" />
             <div>
               <span className="text-xs text-muted-foreground block">تاریخ جلسه</span>
-              <span className="text-sm font-bold text-foreground">{sheet.session.date}</span>
+              <span className="text-sm font-bold text-foreground">{formatJalaliFull(sheet.session.date)}</span>
             </div>
           </div>
         </Card>
@@ -154,7 +159,7 @@ export function AttendanceSheetPage({
             <div>
               <span className="text-xs text-muted-foreground block">ساعت برگزاری</span>
               <span className="text-sm font-bold text-foreground">
-                {sheet.session.startTime} تا {sheet.session.endTime}
+                {formatLocalizedTime(sheet.session.startTime)} تا {formatLocalizedTime(sheet.session.endTime)}
               </span>
             </div>
           </div>
@@ -166,9 +171,9 @@ export function AttendanceSheetPage({
             <div>
               <span className="text-xs text-muted-foreground block">آمار حضور</span>
               <div className="text-sm font-bold text-foreground flex items-center gap-2">
-                <span className="text-emerald-500">{sheet.presentCount} حاضر</span>
+                <span className="text-emerald-500">{toPersianDigits(sheet.presentCount)} حاضر</span>
                 <span>/</span>
-                <span className="text-rose-500">{sheet.absentCount} غایب</span>
+                <span className="text-rose-500">{toPersianDigits(sheet.absentCount)} غایب</span>
               </div>
             </div>
           </div>
@@ -179,7 +184,7 @@ export function AttendanceSheetPage({
             <Percent className="h-5 w-5 text-amber-500" />
             <div>
               <span className="text-xs text-muted-foreground block">درصد مشارکت</span>
-              <span className="text-sm font-bold text-foreground">{attendancePercent}٪</span>
+              <span className="text-sm font-bold text-foreground">{toPersianDigits(attendancePercent)}٪</span>
             </div>
           </div>
         </Card>
@@ -204,10 +209,12 @@ export function AttendanceSheetPage({
             sheet.students.map((student, index) => {
               const isToggling = togglingStudentId === student.id;
               const formattedTime = student.checkedAt
-                ? new Date(student.checkedAt).toLocaleTimeString('fa-IR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
+                ? formatLocalizedTime(
+                    new Date(student.checkedAt).toLocaleTimeString('en-GB', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  )
                 : null;
 
               return (
@@ -220,7 +227,7 @@ export function AttendanceSheetPage({
                 >
                   <div className="flex items-center gap-4">
                     <span className="text-xs font-mono text-muted-foreground w-6 text-center">
-                      {index + 1}
+                      {toPersianDigits(index + 1)}
                     </span>
                     <div className="space-y-0.5">
                       <div className="text-sm font-bold text-foreground flex items-center gap-2">

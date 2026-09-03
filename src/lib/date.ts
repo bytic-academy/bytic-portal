@@ -220,14 +220,151 @@ export function formatJalaliShort(isoDate: string): string {
 }
 
 /**
- * Formats ISO YYYY-MM-DD based on locale ('fa' or 'en').
+ * Formats ISO YYYY-MM-DD into medium Jalali date: e.g. "۲ شهریور ۱۴۰۵" (no weekday).
  */
-export function formatLocalizedDate(isoDate: string, locale: 'fa' | 'en' = 'fa'): string {
+export function formatJalaliMedium(isoDate: string): string {
+  const date = parseISODate(isoDate);
+  const { jy, jm, jd } = gregorianToJalali(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate()
+  );
+  const monthName = JALALI_MONTH_NAMES_FA[jm - 1];
+  return `${toPersianDigits(jd)} ${monthName} ${toPersianDigits(jy)}`;
+}
+
+/**
+ * Formats 24h time string (e.g. "10:30") with localized Persian digits ("۱۰:۳۰").
+ */
+export function formatLocalizedTime(timeStr: string): string {
+  if (!timeStr) return '';
+  const cleanTime = timeStr.slice(0, 5); // Take HH:MM
+  return toPersianDigits(cleanTime);
+}
+
+/**
+ * Formats an ISO UTC timestamp (e.g. "2026-09-03T07:32:00.000Z") into localized Jalali date and time.
+ */
+export function formatLocalizedDateTime(
+  utcIsoStr: string,
+  options: { includeSeconds?: boolean } = {}
+): string {
+  if (!utcIsoStr) return '';
+  const date = new Date(utcIsoStr);
+  if (isNaN(date.getTime())) return '';
+
+  const { jy, jm, jd } = gregorianToJalali(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate()
+  );
+  const weekday = PERSIAN_WEEKDAYS[date.getDay()];
+  const monthName = JALALI_MONTH_NAMES_FA[jm - 1];
+
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const timePart = options.includeSeconds
+    ? `${hh}:${mm}:${String(date.getSeconds()).padStart(2, '0')}`
+    : `${hh}:${mm}`;
+
+  return `${weekday} ${toPersianDigits(jd)} ${monthName} ${toPersianDigits(jy)}، ساعت ${toPersianDigits(timePart)}`;
+}
+
+/**
+ * Returns today's detailed Jalali date components and pre-formatted strings.
+ */
+export function getJalaliTodayDetails() {
+  const now = new Date();
+  const { jy, jm, jd } = gregorianToJalali(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    now.getDate()
+  );
+  const weekday = PERSIAN_WEEKDAYS[now.getDay()];
+  const monthName = JALALI_MONTH_NAMES_FA[jm - 1];
+  const mm = String(jm).padStart(2, '0');
+  const dd = String(jd).padStart(2, '0');
+
+  return {
+    jy,
+    jm,
+    jd,
+    weekday,
+    monthName,
+    fullFormatted: `${weekday} ${toPersianDigits(jd)} ${monthName} ${toPersianDigits(jy)}`,
+    mediumFormatted: `${toPersianDigits(jd)} ${monthName} ${toPersianDigits(jy)}`,
+    shortFormatted: toPersianDigits(`${jy}/${mm}/${dd}`),
+  };
+}
+
+/**
+ * Parses a Jalali date string (e.g. "1405/06/24" or "۱۴۰۵/۰۶/۲۴") to an ISO Gregorian string ("YYYY-MM-DD").
+ */
+export function parseJalaliToISO(jalaliStr: string): string | null {
+  if (!jalaliStr) return null;
+
+  // Normalize Persian/Arabic digits to Western digits
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  let normalized = jalaliStr.trim();
+  persianDigits.forEach((pd, idx) => {
+    normalized = normalized.replaceAll(pd, String(idx));
+  });
+
+  const parts = normalized.split(/[/ -]/).map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return null;
+
+  const [jy, jm, jd] = parts;
+  if (jy < 1200 || jy > 1500 || jm < 1 || jm > 12 || jd < 1 || jd > 31) {
+    return null;
+  }
+
+  const { gy, gm, gd } = jalaliToGregorian(jy, jm, jd);
+  const yyyy = String(gy).padStart(4, '0');
+  const mm = String(gm).padStart(2, '0');
+  const dd = String(gd).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * Calculates approximate age in whole years from an ISO birthdate ("YYYY-MM-DD").
+ */
+export function calculateAge(birthdateIso: string): number | null {
+  if (!birthdateIso) return null;
+  const birth = parseISODate(birthdateIso);
+  if (isNaN(birth.getTime())) return null;
+
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const monthDiff = now.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age >= 0 ? age : null;
+}
+
+/**
+ * Formats ISO YYYY-MM-DD based on locale ('fa' or 'en') and style ('full' | 'medium' | 'short').
+ */
+export function formatLocalizedDate(
+  isoDate: string,
+  locale: 'fa' | 'en' = 'fa',
+  style: 'full' | 'medium' | 'short' = 'full'
+): string {
   if (locale === 'fa') {
+    if (style === 'short') return formatJalaliShort(isoDate);
+    if (style === 'medium') return formatJalaliMedium(isoDate);
     return formatJalaliFull(isoDate);
   }
   const date = parseISODate(isoDate);
+  if (style === 'short') {
+    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+  }
+  const month = date.toLocaleDateString('en-US', { month: style === 'medium' ? 'short' : 'long' });
+  if (style === 'medium') {
+    return `${month} ${date.getDate()}, ${date.getFullYear()}`;
+  }
   const weekday = ENGLISH_WEEKDAYS[date.getDay()];
-  const month = date.toLocaleDateString('en-US', { month: 'long' });
   return `${weekday}, ${month} ${date.getDate()}, ${date.getFullYear()}`;
 }
+

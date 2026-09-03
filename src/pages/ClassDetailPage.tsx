@@ -32,6 +32,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { JalaliMultiDatePicker } from '@/components/JalaliMultiDatePicker';
+import { JalaliDatePicker } from '@/components/JalaliDatePicker';
+import {
+  formatJalaliMedium,
+  formatLocalizedTime,
+  getTodayISO,
+  toPersianDigits,
+} from '@/lib/date';
 import {
   ArrowRight,
   Users,
@@ -78,7 +85,7 @@ export function ClassDetailPage({
 
   // Form states
   const [bulkDates, setBulkDates] = useState<string[]>([]);
-  const [singleDate, setSingleDate] = useState('2026-09-15');
+  const [singleDate, setSingleDate] = useState(getTodayISO);
   const [startTime, setStartTime] = useState('10:00');
   const [endTime, setEndTime] = useState('11:30');
   const [studentToEnroll, setStudentToEnroll] = useState('');
@@ -115,7 +122,7 @@ export function ClassDetailPage({
         startTime,
         endTime,
       });
-      toast.success(`${bulkDates.length} جلسه با موفقیت ایجاد شد`);
+      toast.success(`${toPersianDigits(bulkDates.length)} جلسه با موفقیت ایجاد شد`);
       setIsBulkOpen(false);
       setBulkDates([]);
     } catch (err) {
@@ -193,7 +200,8 @@ export function ClassDetailPage({
   };
 
   const handleDeleteSession = async (sessionId: string, date: string) => {
-    if (!confirm(`آیا از حذف جلسه تاریخ ${date} اطمینان دارید؟ تمام رکوردهای حضور و غیاب آن نیز حذف خواهد شد.`)) return;
+    const formattedDate = formatJalaliMedium(date);
+    if (!confirm(`آیا از حذف جلسه تاریخ ${formattedDate} اطمینان دارید؟ تمام رکوردهای حضور و غیاب آن نیز حذف خواهد شد.`)) return;
     try {
       await deleteSessionMutation.mutateAsync({ classId, sessionId });
       toast.success('جلسه با موفقیت حذف شد');
@@ -303,13 +311,13 @@ export function ClassDetailPage({
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1">
                         <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-bold">
-                          <span>جلسه {index + 1}</span>
+                          <span>جلسه {toPersianDigits(index + 1)}</span>
                         </div>
                         <div className="text-sm font-bold text-foreground">
-                          {session.date}
+                          {formatJalaliMedium(session.date)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          ساعت: {session.startTime} تا {session.endTime}
+                          ساعت: {formatLocalizedTime(session.startTime)} تا {formatLocalizedTime(session.endTime)}
                         </div>
                       </div>
                       <Button
@@ -374,7 +382,7 @@ export function ClassDetailPage({
                       <div className="font-bold text-sm text-foreground">{student.name}</div>
                       <div className="text-xs text-muted-foreground">
                         {student.gender === 'MALE' ? 'پسر' : student.gender === 'FEMALE' ? 'دختر' : ''}
-                        {student.birthdate ? ` • متولد ${student.birthdate}` : ''}
+                        {student.birthdate ? ` • متولد ${formatJalaliMedium(student.birthdate)}` : ''}
                       </div>
                     </div>
                     <Button
@@ -529,18 +537,13 @@ export function ClassDetailPage({
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="singleDate" className="text-xs font-semibold">
-                  تاریخ جلسه (YYYY-MM-DD) *
-                </Label>
-                <Input
-                  id="singleDate"
-                  type="date"
-                  value={singleDate}
-                  onChange={(e) => setSingleDate(e.target.value)}
-                  required
-                />
-              </div>
+              <JalaliDatePicker
+                id="singleDate"
+                label="تاریخ جلسه"
+                value={singleDate}
+                onChange={setSingleDate}
+                required
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -600,7 +603,7 @@ export function ClassDetailPage({
                 <SelectContent>
                   {availableStudents.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
-                      {s.name} {s.birthdate ? `(${s.birthdate})` : ''}
+                      {s.name} {s.birthdate ? `(${formatJalaliMedium(s.birthdate)})` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>

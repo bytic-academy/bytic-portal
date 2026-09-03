@@ -34,6 +34,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
+import { JalaliDatePicker } from '@/components/JalaliDatePicker';
+import { formatJalaliMedium } from '@/lib/date';
 
 export function StudentsPage() {
   const { isAdmin } = useAuth();
@@ -151,7 +153,7 @@ export function StudentsPage() {
                     <div className="font-bold text-base text-foreground">{student.name}</div>
                     <div className="text-xs text-muted-foreground">
                       {student.gender === 'MALE' ? m.gender_male() : student.gender === 'FEMALE' ? m.gender_female() : 'نامشخص'}
-                      {student.birthdate ? ` • متولد ${student.birthdate}` : ''}
+                      {student.birthdate ? ` • متولد ${formatJalaliMedium(student.birthdate)}` : ''}
                     </div>
                   </div>
 
@@ -236,17 +238,13 @@ export function StudentsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="birthdate" className="text-xs font-semibold">
-                    تاریخ تولد (اختیاری)
-                  </Label>
-                  <Input
-                    id="birthdate"
-                    type="date"
-                    value={birthdate}
-                    onChange={(e) => setBirthdate(e.target.value)}
-                  />
-                </div>
+                <JalaliDatePicker
+                  id="birthdate"
+                  label="تاریخ تولد (اختیاری)"
+                  value={birthdate}
+                  onChange={setBirthdate}
+                  placeholder="انتخاب تاریخ تولد شمسی..."
+                />
 
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold">جنسیت</Label>
