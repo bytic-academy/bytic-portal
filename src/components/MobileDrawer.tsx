@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useI18n } from '@/components/i18n/I18nProvider';
 import {
   LayoutDashboard,
   GraduationCap,
@@ -31,7 +30,6 @@ export function MobileDrawer({
   onSelectTab,
 }: MobileDrawerProps) {
   const { user, logout, isAdmin } = useAuth();
-  const { isRTL } = useI18n();
 
   // Handle ESC key to dismiss drawer
   useEffect(() => {
@@ -89,9 +87,7 @@ export function MobileDrawer({
 
       {/* Slide-out Drawer Panel */}
       <div
-        className={`fixed inset-y-0 ${
-          isRTL ? 'end-0 border-s' : 'start-0 border-e'
-        } z-50 w-72 max-w-[85vw] bg-card border-border flex flex-col justify-between p-4 shadow-2xl transition-transform duration-300 ease-out`}
+        className="fixed inset-y-0 start-0 border-e z-50 w-72 max-w-[85vw] bg-card border-border flex flex-col justify-between p-4 shadow-2xl transition-transform duration-300 ease-out"
       >
         <div className="space-y-6">
           {/* Top Header with Brand & Close Button */}
@@ -186,7 +182,7 @@ export function MobileDrawer({
             }}
             className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-xs font-semibold h-11"
           >
-            <LogOut className="h-4 w-4 me-2" />
+            <LogOut className="h-4 w-4 me-2 rtl:-scale-x-100" />
             <span>{m.nav_logout()}</span>
           </Button>
         </div>

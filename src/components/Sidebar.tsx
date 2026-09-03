@@ -99,7 +99,7 @@ export function Sidebar({ currentTab, onSelectTab }: SidebarProps) {
           onClick={logout}
           className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-xs font-medium"
         >
-          <LogOut className="h-4 w-4 me-2" />
+          <LogOut className="h-4 w-4 me-2 rtl:-scale-x-100" />
           <span>{m.nav_logout()}</span>
         </Button>
       </div>

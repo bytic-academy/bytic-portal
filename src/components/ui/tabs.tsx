@@ -2,7 +2,21 @@ import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from '@/lib/utils';
 
-const Tabs = TabsPrimitive.Root;
+const Tabs = React.forwardRef<
+  React.ComponentRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ dir, ...props }, ref) => {
+  let resolvedDir = dir;
+  if (!resolvedDir) {
+    if (typeof document !== 'undefined') {
+      resolvedDir = (document.documentElement.getAttribute('dir') as 'rtl' | 'ltr') || 'rtl';
+    } else {
+      resolvedDir = 'rtl';
+    }
+  }
+  return <TabsPrimitive.Root ref={ref} dir={resolvedDir} {...props} />;
+});
+Tabs.displayName = TabsPrimitive.Root.displayName;
 
 const TabsList = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.List>,

@@ -8,11 +8,11 @@ import {
   Users,
   CalendarCheck,
   Calendar,
-  ArrowUpRight,
+  ArrowUpLeft,
   Sparkles,
 } from 'lucide-react';
 import { m } from '@/paraglide/messages';
-import { getJalaliTodayDetails } from '@/lib/date';
+import { getJalaliTodayDetails, toPersianDigits } from '@/lib/date';
 
 interface DashboardPageProps {
   onNavigate: (tab: string) => void;
@@ -60,7 +60,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 {m.nav_courses()}
               </span>
               <div className="text-2xl font-black text-foreground">
-                {courses.length}
+                {toPersianDigits(courses.length)}
               </div>
             </div>
             <div className="h-11 w-11 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -76,7 +76,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 {isAdmin ? 'تمام کلاس‌ها' : 'کلاس‌های من'}
               </span>
               <div className="text-2xl font-black text-foreground">
-                {classes.length}
+                {toPersianDigits(classes.length)}
               </div>
             </div>
             <div className="h-11 w-11 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center">
@@ -92,7 +92,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 {m.nav_students()}
               </span>
               <div className="text-2xl font-black text-foreground">
-                {students.length}
+                {toPersianDigits(students.length)}
               </div>
             </div>
             <div className="h-11 w-11 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
@@ -108,7 +108,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 جلسات ثبت‌شده
               </span>
               <div className="text-2xl font-black text-foreground">
-                {totalSessions}
+                {toPersianDigits(totalSessions)}
               </div>
             </div>
             <div className="h-11 w-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
@@ -132,7 +132,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
             className="text-xs"
           >
             <span>مشاهده همه کلاس‌ها</span>
-            <ArrowUpRight className="h-3.5 w-3.5 ms-1" />
+            <ArrowUpLeft className="h-3.5 w-3.5 ms-1" />
           </Button>
         </CardHeader>
         <CardContent>
@@ -157,8 +157,8 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/50">
-                    <span>{cls._count?.students || 0} دانش‌آموز</span>
-                    <span>{cls._count?.sessions || 0} جلسه</span>
+                    <span>{toPersianDigits(cls._count?.students || 0)} دانش‌آموز</span>
+                    <span>{toPersianDigits(cls._count?.sessions || 0)} جلسه</span>
                   </div>
                 </div>
               ))}

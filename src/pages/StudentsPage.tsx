@@ -35,7 +35,7 @@ import {
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
 import { JalaliDatePicker } from '@/components/JalaliDatePicker';
-import { formatJalaliMedium } from '@/lib/date';
+import { formatJalaliMedium, toPersianDigits } from '@/lib/date';
 
 export function StudentsPage() {
   const { isAdmin } = useAuth();
@@ -189,7 +189,7 @@ export function StudentsPage() {
                 <div className="pt-2 border-t border-border/50 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1 mb-1 font-medium text-foreground">
                     <School className="h-3.5 w-3.5 text-primary" />
-                    <span>کلاس‌های ثبت‌نامی ({student.classes?.length || 0}):</span>
+                    <span>کلاس‌های ثبت‌نامی ({toPersianDigits(student.classes?.length || 0)}):</span>
                   </div>
                   {student.classes && student.classes.length > 0 ? (
                     <div className="flex flex-wrap gap-1">

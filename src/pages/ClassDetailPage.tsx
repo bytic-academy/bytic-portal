@@ -253,15 +253,15 @@ export function ClassDetailPage({
         <TabsList className="grid grid-cols-3 w-full sm:max-w-md h-auto p-1">
           <TabsTrigger value="sessions" className="gap-1.5 py-2.5 sm:py-1.5 px-1 sm:px-3 text-xs font-semibold">
             <CalendarCheck className="h-4 w-4 shrink-0" />
-            <span>جلسات ({cls.sessions?.length || 0})</span>
+            <span>جلسات ({toPersianDigits(cls.sessions?.length || 0)})</span>
           </TabsTrigger>
           <TabsTrigger value="students" className="gap-1.5 py-2.5 sm:py-1.5 px-1 sm:px-3 text-xs font-semibold">
             <Users className="h-4 w-4 shrink-0" />
-            <span>دانش‌آموزان ({cls.students?.length || 0})</span>
+            <span>دانش‌آموزان ({toPersianDigits(cls.students?.length || 0)})</span>
           </TabsTrigger>
           <TabsTrigger value="teachers" className="gap-1.5 py-2.5 sm:py-1.5 px-1 sm:px-3 text-xs font-semibold">
             <UserCheck className="h-4 w-4 shrink-0" />
-            <span>اساتید ({cls.teachers?.length || 0})</span>
+            <span>اساتید ({toPersianDigits(cls.teachers?.length || 0)})</span>
           </TabsTrigger>
         </TabsList>
 
@@ -521,7 +521,7 @@ export function ClassDetailPage({
                 disabled={bulkCreateMutation.isPending || bulkDates.length === 0}
                 className="bg-[var(--bytic-green)] hover:bg-[var(--bytic-green)]/90 text-white font-bold"
               >
-                {bulkCreateMutation.isPending ? 'در حال ایجاد...' : `ایجاد ${bulkDates.length} جلسه`}
+                {bulkCreateMutation.isPending ? 'در حال ایجاد...' : `ایجاد ${toPersianDigits(bulkDates.length)} جلسه`}
               </Button>
             </DialogFooter>
           </form>

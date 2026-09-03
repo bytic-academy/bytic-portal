@@ -22,7 +22,14 @@ export function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : m.login_error());
+      const rawMsg = err instanceof Error ? err.message : '';
+      if (!rawMsg || rawMsg.toLowerCase().includes('invalid') || rawMsg.toLowerCase().includes('password')) {
+        setError(m.login_error());
+      } else if (rawMsg.toLowerCase().includes('failed to fetch') || rawMsg.toLowerCase().includes('network')) {
+        setError('خطا در برقراری ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+      } else {
+        setError(rawMsg);
+      }
     } finally {
       setIsLoading(false);
     }

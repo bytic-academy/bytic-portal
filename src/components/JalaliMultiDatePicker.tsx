@@ -57,7 +57,7 @@ export function JalaliMultiDatePicker({
     <div className="space-y-2">
       {label && <label className="text-xs font-semibold text-foreground">{label}</label>}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="relative inline-block w-full sm:w-auto">
+        <div className="relative w-full sm:w-80">
           <DatePicker
             multiple
             value={dateObjects}
@@ -65,10 +65,15 @@ export function JalaliMultiDatePicker({
             calendar={persian}
             locale={persian_fa}
             calendarPosition="bottom-right"
-            inputClass="flex h-10 w-full sm:w-80 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            containerClassName="w-full sm:w-80"
+            containerStyle={{ width: '100%' }}
+            inputClass="flex h-10 w-full sm:w-80 rounded-md border border-input bg-background ps-3 pe-10 py-2 text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="انتخاب تاریخ‌های جلسات (چندانتخابی)"
             format="YYYY/MM/DD"
           />
+          <div className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+            <Calendar className="h-4 w-4" />
+          </div>
         </div>
         {value.length > 0 && (
           <Button

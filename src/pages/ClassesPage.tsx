@@ -31,11 +31,12 @@ import {
   Users,
   Calendar,
   UserCheck,
-  ArrowUpRight,
+  ArrowUpLeft,
   Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
+import { toPersianDigits } from '@/lib/date';
 
 interface ClassesPageProps {
   onSelectClass: (classId: string) => void;
@@ -148,7 +149,7 @@ export function ClassesPage({ onSelectClass }: ClassesPageProps) {
                         {cls.name || 'کلاس عمومی'}
                       </CardTitle>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                    <ArrowUpLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -162,11 +163,11 @@ export function ClassesPage({ onSelectClass }: ClassesPageProps) {
                   <div className="flex items-center justify-between text-xs pt-3 border-t border-border/50 text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Users className="h-3.5 w-3.5" />
-                      <span>{cls._count?.students || 0} دانش‌آموز</span>
+                      <span>{toPersianDigits(cls._count?.students || 0)} دانش‌آموز</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
-                      <span>{cls._count?.sessions || 0} جلسه</span>
+                      <span>{toPersianDigits(cls._count?.sessions || 0)} جلسه</span>
                     </span>
                     {isAdmin && (
                       <Button

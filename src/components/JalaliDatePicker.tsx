@@ -83,7 +83,7 @@ export function JalaliDatePicker({
         </label>
       )}
 
-      <div className="relative flex items-center">
+      <div className="relative flex items-center w-full">
         <div className="w-full">
           <DatePicker
             id={id}
@@ -95,7 +95,9 @@ export function JalaliDatePicker({
             format="YYYY/MM/DD"
             placeholder={placeholder}
             disabled={disabled}
-            inputClass="flex h-11 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            containerClassName="w-full"
+            containerStyle={{ width: '100%' }}
+            inputClass="flex h-11 sm:h-10 w-full rounded-md border border-input bg-background ps-3 pe-10 py-2 text-base sm:text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
