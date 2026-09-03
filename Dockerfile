@@ -1,4 +1,4 @@
-﻿FROM node:22-slim AS base
+FROM node:22-slim AS base
 WORKDIR /app
 RUN apt-get update && apt-get install -y openssl curl ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
@@ -25,6 +25,7 @@ COPY . .
 
 # Compile i18n messages, generate Prisma client, and build frontend
 RUN pnpm run compile:i18n
+RUN pnpm run db:generate
 RUN pnpm run build
 
 # ------------------------------------------------------------------------------

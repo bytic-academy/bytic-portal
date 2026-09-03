@@ -1,30 +1,28 @@
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  details?: unknown;
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
 }
 
-export async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
+export async function fetchApi<T>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const res = await fetch(url, {
+    ...options,
+    credentials: 'include', // Send session cookies
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
+      ...options.headers,
     },
-    ...options,
   });
 
-  const json = (await response.json()) as ApiResponse<T>;
+  const json = await res.json().catch(() => ({}));
 
-  if (!response.ok || !json.success) {
-    throw new Error(json.error || `Request failed with status ${response.status}`);
+  if (!res.ok || json.success === false) {
+    throw new ApiError(res.status, json.error || 'Request failed');
   }
 
   return json.data as T;
 }
-
-export const api = {
-  async getHealth(): Promise<{ status: string; uptime: number; timestamp: string }> {
-    return request<{ status: string; uptime: number; timestamp: string }>('/api/health');
-  },
-};

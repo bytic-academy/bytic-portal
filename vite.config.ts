@@ -54,4 +54,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  ssr: {
+    external: ['bcryptjs', 'better-sqlite3', '@prisma/adapter-libsql', '@libsql/client'],
+  },
 });

@@ -5,4 +5,121 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./client"
+}
+
+// ─── Enums (SQLite doesn't support native enums, using String fields with validation) ───
+
+// ─── User & Auth ───
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("TEACHER") // "ADMIN" | "TEACHER"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions     AuthSession[]
+  classesTeaching ClassTeacher[]
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Domain Models ───
+
+model Course {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes Class[]
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String   @default("")
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teachers  ClassTeacher[]
+  students  ClassStudent[]
+  sessions  Session[]
+}
+
+model ClassTeacher {
+  id        String   @id @default(cuid())
+  classId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, userId])
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  name      String
+  birthdate String?  // ISO date string YYYY-MM-DD
+  gender    String?  // "MALE" | "FEMALE"
+  about     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes    ClassStudent[]
+  attendance AttendanceRecord[]
+}
+
+model ClassStudent {
+  id        String   @id @default(cuid())
+  classId   String
+  studentId String
+  createdAt DateTime @default(now())
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  classId   String
+  date      String   // ISO date string YYYY-MM-DD
+  startTime String   // HH:MM format
+  endTime   String   // HH:MM format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  class      Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  attendance AttendanceRecord[]
+}
+
+model AttendanceRecord {
+  id        String   @id @default(cuid())
+  sessionId String
+  studentId String
+  present   Boolean  @default(false)
+  checkedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
 }

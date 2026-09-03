@@ -38,3 +38,5 @@ Thumbs.db
 *.db-journal
 *.sqlite
 *.sqlite3
+prisma/client/
+tests/.tmp/

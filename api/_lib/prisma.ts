@@ -1,6 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { createRequire } from 'node:module';
 import { PrismaLibSQL } from '@prisma/adapter-libsql';
 import path from 'node:path';
+import type { PrismaClient as PrismaClientType } from '../../prisma/client/index.js';
+
+const require = createRequire(import.meta.url);
+const prismaPkg = require('../../prisma/client/index.js');
+const PrismaClient = prismaPkg.PrismaClient as typeof PrismaClientType;
+
+export type PrismaClient = PrismaClientType;
+export { PrismaClient };
 
 // Load .env in local Node environments if available
 try {
@@ -31,11 +39,12 @@ function createPrismaClient(): PrismaClient {
   const databaseUrl = process.env.DATABASE_URL;
   if (databaseUrl) {
     if (databaseUrl.startsWith('file:')) {
-      const rawPath = databaseUrl.slice(5);
-      const cleanPath = rawPath.replace(/\\/g, '/');
-      const resolvedPath = path.isAbsolute(cleanPath)
-        ? cleanPath
-        : path.resolve(process.cwd(), cleanPath.replace(/^\.\//, '')).replace(/\\/g, '/');
+      const rawPath = databaseUrl.slice(5).replace(/\\/g, '/');
+      const resolvedPath = path.isAbsolute(rawPath)
+        ? rawPath
+        : rawPath.startsWith('./prisma/') || rawPath.startsWith('prisma/')
+        ? path.resolve(process.cwd(), rawPath.replace(/^\.\//, '')).replace(/\\/g, '/')
+        : path.resolve(process.cwd(), 'prisma', rawPath.replace(/^\.\//, '')).replace(/\\/g, '/');
       
       const adapter = new PrismaLibSQL({
         url: `file:${resolvedPath}`,

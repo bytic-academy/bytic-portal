@@ -108,6 +108,14 @@ export class Router {
   }
 }
 
+import { registerAuthRoutes } from '../auth/routes.js';
+import { registerUsersRoutes } from '../users/routes.js';
+import { registerCoursesRoutes } from '../courses/routes.js';
+import { registerClassesRoutes } from '../classes/routes.js';
+import { registerStudentsRoutes } from '../students/routes.js';
+import { registerSessionsRoutes } from '../sessions/routes.js';
+import { registerAttendanceRoutes } from '../attendance/routes.js';
+
 export function createDefaultApiRouter(): Router {
   const router = new Router();
 
@@ -124,6 +132,15 @@ export function createDefaultApiRouter(): Router {
   };
   router.get('/health', healthHandler);
   router.get('/api/health', healthHandler);
+
+  // Domain Routes
+  registerAuthRoutes(router);
+  registerUsersRoutes(router);
+  registerCoursesRoutes(router);
+  registerClassesRoutes(router);
+  registerStudentsRoutes(router);
+  registerSessionsRoutes(router);
+  registerAttendanceRoutes(router);
 
   return router;
 }

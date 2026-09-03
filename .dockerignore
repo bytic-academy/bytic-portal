@@ -1,4 +1,4 @@
-﻿node_modules
+node_modules
 dist
 .git
 .agents
@@ -9,3 +9,5 @@ openspec
 .DS_Store
 prisma/dev.db
 prisma/dev.db-journal
+prisma/client
+tests/.tmp
