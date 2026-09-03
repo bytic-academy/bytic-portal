@@ -102,7 +102,7 @@ export function ClassesPage({ onSelectClass }: ClassesPageProps) {
         </div>
 
         {isAdmin && (
-          <Button onClick={() => setIsCreateOpen(true)} className="font-bold gap-2">
+          <Button onClick={() => setIsCreateOpen(true)} className="font-bold gap-2 w-full sm:w-auto h-11 sm:h-9">
             <Plus className="h-4 w-4" />
             <span>{m.btn_new_class()}</span>
           </Button>
@@ -122,14 +122,14 @@ export function ClassesPage({ onSelectClass }: ClassesPageProps) {
               {isAdmin ? 'هنوز کلاسی ثبت نشده است.' : 'هیچ کلاسی به شما اختصاص داده نشده است.'}
             </p>
             {isAdmin && (
-              <Button onClick={() => setIsCreateOpen(true)} variant="outline" size="sm">
+              <Button onClick={() => setIsCreateOpen(true)} variant="outline" size="sm" className="w-full sm:w-auto h-11 sm:h-9">
                 ایجاد اولین کلاس
               </Button>
             )}
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {classes.map((cls: ClassEntity) => {
             const teachersList = cls.teachers?.map((t) => t.user.name).join('، ') || 'بدون استاد';
             return (

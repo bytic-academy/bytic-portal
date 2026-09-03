@@ -166,7 +166,7 @@ export function UsersPage() {
           </p>
         </div>
 
-        <Button onClick={handleOpenCreate} className="font-bold gap-2">
+        <Button onClick={handleOpenCreate} className="font-bold gap-2 w-full sm:w-auto h-11 sm:h-9">
           <Plus className="h-4 w-4" />
           <span>{m.btn_new_user()}</span>
         </Button>
@@ -176,7 +176,7 @@ export function UsersPage() {
       {isLoading ? (
         <div className="text-center py-12 text-sm text-muted-foreground">در حال بارگذاری کاربران...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {users.map((u) => {
             const isSelf = u.id === currentUser?.id;
             return (
@@ -219,7 +219,7 @@ export function UsersPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleOpenReset(u)}
-                      className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      className="h-9 px-2.5 sm:h-8 sm:px-2 text-xs text-muted-foreground hover:text-foreground"
                     >
                       <KeyRound className="h-3.5 w-3.5 me-1" />
                       <span>تغییر رمز</span>
@@ -228,7 +228,7 @@ export function UsersPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleOpenEdit(u)}
-                      className="h-8 px-2 text-xs"
+                      className="h-9 px-2.5 sm:h-8 sm:px-2 text-xs"
                     >
                       <Pencil className="h-3.5 w-3.5 me-1" />
                       <span>{m.btn_edit()}</span>
@@ -238,7 +238,7 @@ export function UsersPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(u)}
-                        className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10"
+                        className="h-9 px-2.5 sm:h-8 sm:px-2 text-xs text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

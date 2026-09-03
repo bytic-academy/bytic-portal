@@ -31,7 +31,7 @@ export function Sidebar({ currentTab, onSelectTab }: SidebarProps) {
   ];
 
   return (
-    <aside className="w-64 bg-card border-e border-border flex flex-col justify-between p-4 shrink-0 transition-colors duration-200">
+    <aside className="hidden md:flex w-64 bg-card border-e border-border flex-col justify-between p-4 shrink-0 transition-colors duration-200">
       <div className="space-y-6">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 py-1">

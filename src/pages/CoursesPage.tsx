@@ -100,7 +100,7 @@ export function CoursesPage() {
         </div>
 
         {isAdmin && (
-          <Button onClick={handleOpenCreate} className="font-bold gap-2">
+          <Button onClick={handleOpenCreate} className="font-bold gap-2 w-full sm:w-auto h-11 sm:h-9">
             <Plus className="h-4 w-4" />
             <span>{m.btn_new_course()}</span>
           </Button>
@@ -118,14 +118,14 @@ export function CoursesPage() {
             <BookOpen className="h-10 w-10 text-muted-foreground mx-auto" />
             <p className="text-sm text-muted-foreground">هنوز دوره‌ای تعریف نشده است.</p>
             {isAdmin && (
-              <Button onClick={handleOpenCreate} variant="outline" size="sm">
+              <Button onClick={handleOpenCreate} variant="outline" size="sm" className="w-full sm:w-auto h-11 sm:h-9">
                 ایجاد اولین دوره
               </Button>
             )}
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {courses.map((course) => (
             <Card key={course.id} className="hover:border-primary/40 transition-colors shadow-xs">
               <CardHeader className="pb-3">
@@ -146,7 +146,7 @@ export function CoursesPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleOpenEdit(course)}
-                        className="h-8 px-2 text-xs"
+                        className="h-9 px-2.5 sm:h-8 sm:px-2 text-xs"
                       >
                         <Pencil className="h-3.5 w-3.5 me-1" />
                         <span>{m.btn_edit()}</span>
@@ -155,7 +155,7 @@ export function CoursesPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(course.id, course.name)}
-                        className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="h-9 px-2.5 sm:h-8 sm:px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
                       >
                         <Trash2 className="h-3.5 w-3.5 me-1" />
                         <span>{m.btn_delete()}</span>

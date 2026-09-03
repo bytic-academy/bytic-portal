@@ -124,7 +124,7 @@ export function StudentsPage() {
           </p>
         </div>
 
-        <Button onClick={handleOpenCreate} className="font-bold gap-2">
+        <Button onClick={handleOpenCreate} className="font-bold gap-2 w-full sm:w-auto h-11 sm:h-9">
           <Plus className="h-4 w-4" />
           <span>{m.btn_new_student()}</span>
         </Button>
@@ -138,13 +138,13 @@ export function StudentsPage() {
           <CardContent className="py-12 text-center space-y-3">
             <Users className="h-10 w-10 text-muted-foreground mx-auto" />
             <p className="text-sm text-muted-foreground">هنوز دانش‌آموزی ثبت نشده است.</p>
-            <Button onClick={handleOpenCreate} variant="outline" size="sm">
+            <Button onClick={handleOpenCreate} variant="outline" size="sm" className="w-full sm:w-auto h-11 sm:h-9">
               ثبت اولین دانش‌آموز
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {students.map((student) => (
             <Card key={student.id} className="hover:border-primary/40 transition-colors shadow-xs">
               <CardContent className="p-4 space-y-3">
@@ -162,7 +162,7 @@ export function StudentsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleOpenEdit(student)}
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                      className="h-9 w-9 sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-foreground"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
@@ -171,7 +171,7 @@ export function StudentsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(student)}
-                        className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                        className="h-9 w-9 sm:h-8 sm:w-8 p-0 text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

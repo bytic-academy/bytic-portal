@@ -217,22 +217,22 @@ export function ClassDetailPage({
   const availableTeachers = allUsers.filter((u) => !assignedTeacherIds.has(u.id));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Back Button & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-0 border-b sm:border-b-0 border-border/60">
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={onBack} className="h-9 w-9 p-0">
+          <Button variant="outline" size="sm" onClick={onBack} className="h-11 w-11 sm:h-9 sm:w-9 p-0 shrink-0">
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-primary">{cls.course?.name}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-xs font-semibold text-primary truncate">{cls.course?.name}</span>
               <span className="text-muted-foreground text-xs">/</span>
-              <h1 className="text-xl sm:text-2xl font-black text-foreground">
+              <h1 className="text-lg sm:text-2xl font-black text-foreground truncate">
                 {cls.name || 'کلاس عمومی'}
               </h1>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
               اساتید: {cls.teachers?.map((t) => t.user.name).join('، ') || 'بدون استاد'}
             </p>
           </div>
@@ -241,7 +241,7 @@ export function ClassDetailPage({
         {/* Quick Bulk Action */}
         <Button
           onClick={() => setIsBulkOpen(true)}
-          className="font-bold gap-2 bg-[var(--bytic-green)] hover:bg-[var(--bytic-green)]/90 text-white"
+          className="font-bold gap-2 bg-[var(--bytic-green)] hover:bg-[var(--bytic-green)]/90 text-white w-full sm:w-auto h-11 sm:h-9 shrink-0"
         >
           <Layers className="h-4 w-4" />
           <span>{m.btn_bulk_sessions()}</span>
@@ -250,34 +250,34 @@ export function ClassDetailPage({
 
       {/* Tabs */}
       <Tabs defaultValue="sessions" className="space-y-4">
-        <TabsList className="grid grid-cols-3 max-w-md">
-          <TabsTrigger value="sessions" className="gap-2 text-xs font-semibold">
-            <CalendarCheck className="h-4 w-4" />
+        <TabsList className="grid grid-cols-3 w-full sm:max-w-md h-auto p-1">
+          <TabsTrigger value="sessions" className="gap-1.5 py-2.5 sm:py-1.5 px-1 sm:px-3 text-xs font-semibold">
+            <CalendarCheck className="h-4 w-4 shrink-0" />
             <span>جلسات ({cls.sessions?.length || 0})</span>
           </TabsTrigger>
-          <TabsTrigger value="students" className="gap-2 text-xs font-semibold">
-            <Users className="h-4 w-4" />
+          <TabsTrigger value="students" className="gap-1.5 py-2.5 sm:py-1.5 px-1 sm:px-3 text-xs font-semibold">
+            <Users className="h-4 w-4 shrink-0" />
             <span>دانش‌آموزان ({cls.students?.length || 0})</span>
           </TabsTrigger>
-          <TabsTrigger value="teachers" className="gap-2 text-xs font-semibold">
-            <UserCheck className="h-4 w-4" />
+          <TabsTrigger value="teachers" className="gap-1.5 py-2.5 sm:py-1.5 px-1 sm:px-3 text-xs font-semibold">
+            <UserCheck className="h-4 w-4 shrink-0" />
             <span>اساتید ({cls.teachers?.length || 0})</span>
           </TabsTrigger>
         </TabsList>
 
         {/* ─── TAB 1: SESSIONS ─── */}
         <TabsContent value="sessions" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" />
+              <Calendar className="h-4 w-4 text-primary shrink-0" />
               <span>فهرست جلسات برگزارشده یا برنامه‌ریزی‌شده</span>
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsSingleSessionOpen(true)}
-                className="text-xs gap-1.5"
+                className="text-xs gap-1.5 flex-1 sm:flex-initial h-10 sm:h-8"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>جلسه تکی</span>
@@ -285,7 +285,7 @@ export function ClassDetailPage({
               <Button
                 size="sm"
                 onClick={() => setIsBulkOpen(true)}
-                className="text-xs gap-1.5 bg-primary"
+                className="text-xs gap-1.5 bg-primary flex-1 sm:flex-initial h-10 sm:h-8"
               >
                 <Layers className="h-3.5 w-3.5" />
                 <span>چند جلسه همزمان</span>
@@ -333,7 +333,7 @@ export function ClassDetailPage({
                     <div className="pt-2 border-t border-border/50">
                       <Button
                         onClick={() => onTakeAttendance(session.id)}
-                        className="w-full font-bold text-xs gap-1.5 bg-primary/90 hover:bg-primary text-primary-foreground"
+                        className="w-full font-bold text-xs gap-1.5 bg-primary/90 hover:bg-primary text-primary-foreground h-11 sm:h-9"
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         <span>{m.btn_attendance()}</span>
@@ -348,15 +348,15 @@ export function ClassDetailPage({
 
         {/* ─── TAB 2: STUDENTS ─── */}
         <TabsContent value="students" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
+              <Users className="h-4 w-4 text-primary shrink-0" />
               <span>دانش‌آموزان ثبت‌نام‌شده در این کلاس</span>
             </h3>
             <Button
               size="sm"
               onClick={() => setIsEnrollOpen(true)}
-              className="text-xs gap-1.5"
+              className="text-xs gap-1.5 w-full sm:w-auto h-10 sm:h-8"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>ثبت‌نام دانش‌آموز جدید در کلاس</span>
@@ -368,7 +368,7 @@ export function ClassDetailPage({
               <CardContent className="py-12 text-center space-y-3">
                 <Users className="h-10 w-10 text-muted-foreground mx-auto" />
                 <p className="text-sm text-muted-foreground">هنوز دانش‌آموزی در این کلاس ثبت‌نام نشده است.</p>
-                <Button size="sm" variant="outline" onClick={() => setIsEnrollOpen(true)}>
+                <Button size="sm" variant="outline" onClick={() => setIsEnrollOpen(true)} className="w-full sm:w-auto h-10 sm:h-8">
                   افزودن دانش‌آموز
                 </Button>
               </CardContent>
@@ -389,7 +389,7 @@ export function ClassDetailPage({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleUnenroll(student.id, student.name)}
-                      className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10"
+                      className="h-9 px-2.5 sm:h-8 sm:px-2 text-xs text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-3.5 w-3.5 me-1" />
                       <span>حذف</span>
@@ -403,16 +403,16 @@ export function ClassDetailPage({
 
         {/* ─── TAB 3: TEACHERS ─── */}
         <TabsContent value="teachers" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-primary" />
+              <UserCheck className="h-4 w-4 text-primary shrink-0" />
               <span>اساتید مسئول این کلاس</span>
             </h3>
             {isAdmin && (
               <Button
                 size="sm"
                 onClick={() => setIsAssignTeacherOpen(true)}
-                className="text-xs gap-1.5"
+                className="text-xs gap-1.5 w-full sm:w-auto h-10 sm:h-8"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>تخصیص استاد جدید</span>

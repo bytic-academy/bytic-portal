@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { I18nProvider, useI18n } from '@/components/i18n/I18nProvider';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
+import { MobileDrawer } from '@/components/MobileDrawer';
 import { LoginPage } from '@/pages/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { CoursesPage } from '@/pages/CoursesPage';
@@ -32,6 +33,7 @@ function AppMain() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -72,15 +74,23 @@ function AppMain() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 selection:text-primary transition-colors duration-200">
       {/* Top Header */}
-      <Header />
+      <Header onOpenDrawer={() => setIsDrawerOpen(true)} />
+
+      {/* Mobile Navigation Drawer */}
+      <MobileDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        currentTab={currentTab}
+        onSelectTab={handleSelectTab}
+      />
 
       {/* Main Layout with Sidebar */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
+        {/* Persistent Sidebar for Desktop (hidden on mobile) */}
         <Sidebar currentTab={currentTab} onSelectTab={handleSelectTab} />
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-[calc(1rem+env(safe-area-inset-bottom))]">
           {/* View Routing */}
           {selectedSessionId ? (
             <AttendanceSheetPage
