@@ -8,7 +8,7 @@ import {
   Users,
   UserCog,
   LogOut,
-  Sparkles,
+  Layers,
   X,
 } from 'lucide-react';
 import { m } from '@/paraglide/messages';
@@ -94,14 +94,14 @@ export function MobileDrawer({
           {/* Top Header with Brand & Close Button */}
           <div className="flex items-center justify-between pb-2 border-b border-border/60">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[var(--bytic-green)] to-[var(--bytic-coral)] flex items-center justify-center text-white font-black shadow-md">
-                <Sparkles className="h-5 w-5" />
+              <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs">
+                <Layers className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h2 className="text-sm font-black text-foreground tracking-tight">
+                <h2 className="text-sm font-bold text-foreground tracking-tight">
                   {m.app_title()}
                 </h2>
-                <span className="text-[11px] text-muted-foreground block">
+                <span className="text-[10px] text-muted-foreground block">
                   {isAdmin ? m.role_admin() : m.role_teacher()}
                 </span>
               </div>
@@ -111,23 +111,23 @@ export function MobileDrawer({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-10 w-10 text-muted-foreground hover:text-foreground"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground"
               aria-label="Close menu"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
           {/* User Profile Badge */}
           {user && (
-            <div className="p-3 rounded-xl bg-muted/50 border border-border/50 text-xs space-y-1">
-              <div className="font-bold text-foreground truncate">{user.name}</div>
-              <div className="text-[11px] text-muted-foreground truncate">{user.email}</div>
-              <div className="pt-1">
-                <Badge variant={isAdmin ? 'default' : 'secondary'} className="text-[10px] px-2 py-0">
-                  {isAdmin ? 'دسترسی کامل (Admin)' : 'دسترسی استاد (Teacher)'}
-                </Badge>
+            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40 text-xs flex items-center justify-between">
+              <div className="min-w-0 pe-2">
+                <div className="font-bold text-foreground truncate">{user.name}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
               </div>
+              <Badge variant={isAdmin ? 'default' : 'secondary'} className="text-[9px] px-1.5 py-0 shrink-0">
+                {isAdmin ? 'مدیر' : 'استاد'}
+              </Badge>
             </div>
           )}
 

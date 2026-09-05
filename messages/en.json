@@ -42,5 +42,17 @@
   "btn_bulk_sessions": "Bulk Create Sessions",
   "btn_attendance": "Take Attendance",
   "msg_success": "Operation completed successfully",
-  "msg_error": "An error occurred. Please try again"
+  "msg_error": "An error occurred. Please try again",
+  "mark_all_present": "Mark All Present",
+  "search_student": "Search student...",
+  "stats_present_count": "Present",
+  "stats_absent_count": "Absent",
+  "today_schedule": "Today's Schedule & Sessions",
+  "no_sessions_today": "No sessions scheduled for today",
+  "attendance_recorded": "Recorded",
+  "attendance_pending": "Pending",
+  "add_sessions": "Add Session(s)",
+  "single_session_mode": "Single Session",
+  "bulk_session_mode": "Bulk Sessions",
+  "today_pending_callout": "Sessions Requiring Attendance Today"
 }

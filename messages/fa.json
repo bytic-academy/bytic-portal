@@ -42,5 +42,17 @@
   "btn_bulk_sessions": "ایجاد چند جلسه همزمان (تقویم شمسی)",
   "btn_attendance": "ثبت حضور و غیاب",
   "msg_success": "عملیات با موفقیت انجام شد",
-  "msg_error": "خطایی رخ داد. لطفا مجدد تلاش کنید"
+  "msg_error": "خطایی رخ داد. لطفا مجدد تلاش کنید",
+  "mark_all_present": "حاضر کردن همه",
+  "search_student": "جستجوی دانش‌آموز...",
+  "stats_present_count": "حاضر",
+  "stats_absent_count": "غایب",
+  "today_schedule": "برنامه و جلسات امروز",
+  "no_sessions_today": "امروز هیچ جلسه‌ای برنامه‌ریزی نشده است",
+  "attendance_recorded": "ثبت شده",
+  "attendance_pending": "ثبت نشده",
+  "add_sessions": "افزودن جلسه / جلسات",
+  "single_session_mode": "تک جلسه",
+  "bulk_session_mode": "چند جلسه همزمان",
+  "today_pending_callout": "جلسات نیازمند ثبت حضور و غیاب امروز"
 }

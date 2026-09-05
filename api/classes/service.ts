@@ -54,6 +54,14 @@ export async function listClasses(
           },
         },
       },
+      sessions: {
+        include: {
+          _count: {
+            select: { attendance: true },
+          },
+        },
+        orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+      },
       _count: {
         select: {
           students: true,
@@ -93,6 +101,11 @@ export async function getClassById(
         },
       },
       sessions: {
+        include: {
+          _count: {
+            select: { attendance: true },
+          },
+        },
         orderBy: [
           { date: 'asc' },
           { startTime: 'asc' },
