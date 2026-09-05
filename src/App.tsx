@@ -1,144 +1,33 @@
-import { useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { RouterProvider } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
-import { I18nProvider, useI18n } from '@/components/i18n/I18nProvider';
-import { Header } from '@/components/Header';
-import { Sidebar } from '@/components/Sidebar';
-import { MobileDrawer } from '@/components/MobileDrawer';
-import { LoginPage } from '@/pages/LoginPage';
-import { DashboardPage } from '@/pages/DashboardPage';
-import { CoursesPage } from '@/pages/CoursesPage';
-import { ClassesPage } from '@/pages/ClassesPage';
-import { ClassDetailPage } from '@/pages/ClassDetailPage';
-import { StudentsPage } from '@/pages/StudentsPage';
-import { UsersPage } from '@/pages/UsersPage';
-import { AttendanceSheetPage } from '@/pages/AttendanceSheetPage';
-import { Toaster } from 'sonner';
-import { Sparkles } from 'lucide-react';
+import { router } from './router';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
-function AppMain() {
+function AppRouter() {
   const { user, isLoading, isAdmin } = useAuth();
-  const { isRTL } = useI18n();
+  const queryClient = useQueryClient();
 
-  // Navigation state
-  const [currentTab, setCurrentTab] = useState<string>('dashboard');
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-[var(--bytic-green)] to-[var(--bytic-coral)] flex items-center justify-center text-white font-black shadow-lg animate-pulse">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <span className="text-sm font-bold text-muted-foreground">در حال بارگذاری سامانه...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  // Handle Tab Switch
-  const handleSelectTab = (tab: string) => {
-    setSelectedClassId(null);
-    setSelectedSessionId(null);
-    setCurrentTab(tab);
-  };
-
-  // Handle Class Navigation
-  const handleSelectClass = (classId: string) => {
-    setSelectedClassId(classId);
-    setSelectedSessionId(null);
-    setCurrentTab('classes');
-  };
-
-  // Handle Attendance Navigation
-  const handleTakeAttendance = (sessionId: string) => {
-    setSelectedSessionId(sessionId);
-  };
+  useEffect(() => {
+    router.invalidate();
+  }, [user, isLoading, isAdmin]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 selection:text-primary transition-colors duration-200">
-      {/* Top Header */}
-      <Header onOpenDrawer={() => setIsDrawerOpen(true)} />
-
-      {/* Mobile Navigation Drawer */}
-      <MobileDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        currentTab={currentTab}
-        onSelectTab={handleSelectTab}
-      />
-
-      {/* Main Layout with Sidebar */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Persistent Sidebar for Desktop (hidden on mobile) */}
-        <Sidebar currentTab={currentTab} onSelectTab={handleSelectTab} />
-
-        {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-[calc(1rem+env(safe-area-inset-bottom))]">
-          {/* View Routing */}
-          {selectedSessionId ? (
-            <AttendanceSheetPage
-              sessionId={selectedSessionId}
-              onBack={() => setSelectedSessionId(null)}
-            />
-          ) : selectedClassId ? (
-            <ClassDetailPage
-              classId={selectedClassId}
-              onBack={() => setSelectedClassId(null)}
-              onTakeAttendance={handleTakeAttendance}
-            />
-          ) : currentTab === 'dashboard' ? (
-            <DashboardPage onNavigate={handleSelectTab} />
-          ) : currentTab === 'courses' ? (
-            <CoursesPage />
-          ) : currentTab === 'classes' ? (
-            <ClassesPage onSelectClass={handleSelectClass} />
-          ) : currentTab === 'students' ? (
-            <StudentsPage />
-          ) : currentTab === 'users' && isAdmin ? (
-            <UsersPage />
-          ) : (
-            <DashboardPage onNavigate={handleSelectTab} />
-          )}
-        </main>
-      </div>
-
-      {/* Global Toast Notification System */}
-      <Toaster
-        dir={isRTL ? 'rtl' : 'ltr'}
-        position={isRTL ? 'top-left' : 'top-right'}
-        richColors
-        closeButton
-      />
-    </div>
+    <RouterProvider
+      router={router}
+      context={{
+        auth: { user, isLoading, isAdmin },
+        queryClient,
+      }}
+    />
   );
 }
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <AuthProvider>
-          <AppMain />
-        </AuthProvider>
-      </I18nProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <AppRouter />
+    </AuthProvider>
   );
 }
 

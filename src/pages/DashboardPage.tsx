@@ -11,14 +11,16 @@ import {
   ArrowUpLeft,
   Sparkles,
 } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { m } from '@/paraglide/messages';
 import { getJalaliTodayDetails, toPersianDigits } from '@/lib/date';
 
 interface DashboardPageProps {
-  onNavigate: (tab: string) => void;
+  onNavigate?: (tab: string) => void;
 }
 
-export function DashboardPage({ onNavigate }: DashboardPageProps) {
+export function DashboardPage({ onNavigate }: DashboardPageProps = {}) {
+  const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const { data: courses = [] } = useCourses();
   const { data: classes = [] } = useClasses();
@@ -128,7 +130,10 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onNavigate('classes')}
+            onClick={() => {
+              onNavigate?.('classes');
+              navigate({ to: '/classes' });
+            }}
             className="text-xs"
           >
             <span>مشاهده همه کلاس‌ها</span>
@@ -145,7 +150,10 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               {classes.slice(0, 6).map((cls) => (
                 <div
                   key={cls.id}
-                  onClick={() => onNavigate('classes')}
+                  onClick={() => {
+                    onNavigate?.('classes');
+                    navigate({ to: '/classes/$classId', params: { classId: cls.id } });
+                  }}
                   className="p-4 rounded-xl bg-card border hover:border-primary/50 transition-all cursor-pointer space-y-2 group shadow-xs"
                 >
                   <div className="flex items-start justify-between gap-2">

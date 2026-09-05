@@ -1,3 +1,4 @@
+import { Link, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
@@ -13,22 +14,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface SidebarProps {
-  currentTab: string;
-  onSelectTab: (tab: string) => void;
+  currentTab?: string;
+  onSelectTab?: (tab: string) => void;
 }
 
-export function Sidebar({ currentTab, onSelectTab }: SidebarProps) {
+export function Sidebar({ onSelectTab }: SidebarProps) {
   const { user, logout, isAdmin } = useAuth();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const navItems = [
-    { id: 'dashboard', label: m.nav_dashboard(), icon: LayoutDashboard },
-    { id: 'courses', label: m.nav_courses(), icon: GraduationCap },
-    { id: 'classes', label: m.nav_classes(), icon: School },
-    { id: 'students', label: m.nav_students(), icon: Users },
+    { to: '/dashboard', label: m.nav_dashboard(), icon: LayoutDashboard },
+    { to: '/courses', label: m.nav_courses(), icon: GraduationCap },
+    { to: '/classes', label: m.nav_classes(), icon: School },
+    { to: '/students', label: m.nav_students(), icon: Users },
     ...(isAdmin
-      ? [{ id: 'users', label: m.nav_users(), icon: UserCog, badge: 'مدیر' }]
+      ? [{ to: '/users', label: m.nav_users(), icon: UserCog, badge: 'مدیر' } as const]
       : []),
-  ];
+  ] as const;
 
   return (
     <aside className="hidden md:flex w-64 bg-card border-e border-border flex-col justify-between p-4 shrink-0 transition-colors duration-200">
@@ -65,11 +67,16 @@ export function Sidebar({ currentTab, onSelectTab }: SidebarProps) {
         <nav className="space-y-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentTab === item.id;
+            const isActive =
+              item.to === '/classes'
+                ? pathname.startsWith('/classes') || pathname.startsWith('/sessions')
+                : pathname === item.to || pathname.startsWith(`${item.to}/`);
+
             return (
-              <button
-                key={item.id}
-                onClick={() => onSelectTab(item.id)}
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => onSelectTab?.(item.to.slice(1))}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-sm'
@@ -80,12 +87,12 @@ export function Sidebar({ currentTab, onSelectTab }: SidebarProps) {
                   <Icon className="h-4 w-4" />
                   <span>{item.label}</span>
                 </div>
-                {item.badge && (
+                {'badge' in item && item.badge && (
                   <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary/40">
                     {item.badge}
                   </Badge>
                 )}
-              </button>
+              </Link>
             );
           })}
         </nav>

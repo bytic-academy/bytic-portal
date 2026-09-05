@@ -34,15 +34,17 @@ import {
   ArrowUpLeft,
   Trash2,
 } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
 import { toPersianDigits } from '@/lib/date';
 
 interface ClassesPageProps {
-  onSelectClass: (classId: string) => void;
+  onSelectClass?: (classId: string) => void;
 }
 
-export function ClassesPage({ onSelectClass }: ClassesPageProps) {
+export function ClassesPage({ onSelectClass }: ClassesPageProps = {}) {
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { data: classes = [], isLoading } = useClasses();
   const { data: courses = [] } = useCourses();
@@ -136,7 +138,10 @@ export function ClassesPage({ onSelectClass }: ClassesPageProps) {
             return (
               <Card
                 key={cls.id}
-                onClick={() => onSelectClass(cls.id)}
+                onClick={() => {
+                  onSelectClass?.(cls.id);
+                  navigate({ to: '/classes/$classId', params: { classId: cls.id } });
+                }}
                 className="hover:border-primary/50 transition-all cursor-pointer shadow-xs group"
               >
                 <CardHeader className="pb-2">

@@ -50,22 +50,46 @@ import {
   Calendar,
   Layers,
 } from 'lucide-react';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
 
 interface ClassDetailPageProps {
-  classId: string;
-  onBack: () => void;
-  onTakeAttendance: (sessionId: string) => void;
+  classId?: string;
+  onBack?: () => void;
+  onTakeAttendance?: (sessionId: string) => void;
 }
 
 export function ClassDetailPage({
   classId,
   onBack,
   onTakeAttendance,
-}: ClassDetailPageProps) {
+}: ClassDetailPageProps = {}) {
+  const navigate = useNavigate();
+  const params = useParams({ strict: false });
+  const effectiveClassId = classId || (params as { classId?: string })?.classId || '';
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate({ to: '/classes' });
+    }
+  };
+
+  const handleTakeAttendance = (sessionId: string) => {
+    if (onTakeAttendance) {
+      onTakeAttendance(sessionId);
+    } else {
+      navigate({
+        to: '/sessions/$sessionId/attendance',
+        params: { sessionId },
+      });
+    }
+  };
+
   const { isAdmin } = useAuth();
-  const { data: cls, isLoading } = useClass(classId);
+  const { data: cls, isLoading } = useClass(effectiveClassId);
   const { data: allStudents = [] } = useStudents();
   const { data: allUsers = [] } = useUsers();
 
@@ -99,7 +123,7 @@ export function ClassDetailPage({
     return (
       <div className="text-center py-12 space-y-3">
         <p className="text-sm text-destructive">کلاس یافت نشد یا دسترسی ندارید.</p>
-        <Button variant="outline" size="sm" onClick={onBack}>بازگشت</Button>
+        <Button variant="outline" size="sm" onClick={handleBack}>بازگشت</Button>
       </div>
     );
   }
@@ -117,7 +141,7 @@ export function ClassDetailPage({
 
     try {
       await bulkCreateMutation.mutateAsync({
-        classId,
+        classId: effectiveClassId,
         dates: bulkDates,
         startTime,
         endTime,
@@ -143,7 +167,7 @@ export function ClassDetailPage({
 
     try {
       await createSessionMutation.mutateAsync({
-        classId,
+        classId: effectiveClassId,
         date: singleDate,
         startTime,
         endTime,
@@ -158,7 +182,7 @@ export function ClassDetailPage({
   const handleEnroll = async () => {
     if (!studentToEnroll) return;
     try {
-      await enrollMutation.mutateAsync({ classId, studentId: studentToEnroll });
+      await enrollMutation.mutateAsync({ classId: effectiveClassId, studentId: studentToEnroll });
       toast.success('دانش‌آموز به کلاس اضافه شد');
       setIsEnrollOpen(false);
       setStudentToEnroll('');
@@ -170,7 +194,7 @@ export function ClassDetailPage({
   const handleUnenroll = async (studentId: string, studentName: string) => {
     if (!confirm(`آیا از حذف دانش‌آموز "${studentName}" از این کلاس اطمینان دارید؟`)) return;
     try {
-      await unenrollMutation.mutateAsync({ classId, studentId });
+      await unenrollMutation.mutateAsync({ classId: effectiveClassId, studentId });
       toast.success('دانش‌آموز از کلاس حذف شد');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : m.msg_error());
@@ -180,7 +204,7 @@ export function ClassDetailPage({
   const handleAssignTeacher = async () => {
     if (!teacherToAssign) return;
     try {
-      await assignTeacherMutation.mutateAsync({ classId, userId: teacherToAssign });
+      await assignTeacherMutation.mutateAsync({ classId: effectiveClassId, userId: teacherToAssign });
       toast.success('استاد به کلاس اضافه شد');
       setIsAssignTeacherOpen(false);
       setTeacherToAssign('');
@@ -192,7 +216,7 @@ export function ClassDetailPage({
   const handleRemoveTeacher = async (userId: string, teacherName: string) => {
     if (!confirm(`آیا از حذف استاد "${teacherName}" از این کلاس اطمینان دارید؟`)) return;
     try {
-      await removeTeacherMutation.mutateAsync({ classId, userId });
+      await removeTeacherMutation.mutateAsync({ classId: effectiveClassId, userId });
       toast.success('استاد از کلاس حذف شد');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : m.msg_error());
@@ -203,7 +227,7 @@ export function ClassDetailPage({
     const formattedDate = formatJalaliMedium(date);
     if (!confirm(`آیا از حذف جلسه تاریخ ${formattedDate} اطمینان دارید؟ تمام رکوردهای حضور و غیاب آن نیز حذف خواهد شد.`)) return;
     try {
-      await deleteSessionMutation.mutateAsync({ classId, sessionId });
+      await deleteSessionMutation.mutateAsync({ classId: effectiveClassId, sessionId });
       toast.success('جلسه با موفقیت حذف شد');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : m.msg_error());
@@ -221,7 +245,7 @@ export function ClassDetailPage({
       {/* Back Button & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-0 border-b sm:border-b-0 border-border/60">
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={onBack} className="h-11 w-11 sm:h-9 sm:w-9 p-0 shrink-0">
+          <Button variant="outline" size="sm" onClick={handleBack} className="h-11 w-11 sm:h-9 sm:w-9 p-0 shrink-0">
             <ArrowRight className="h-4 w-4" />
           </Button>
           <div className="min-w-0">
@@ -332,7 +356,7 @@ export function ClassDetailPage({
 
                     <div className="pt-2 border-t border-border/50">
                       <Button
-                        onClick={() => onTakeAttendance(session.id)}
+                        onClick={() => handleTakeAttendance(session.id)}
                         className="w-full font-bold text-xs gap-1.5 bg-primary/90 hover:bg-primary text-primary-foreground h-11 sm:h-9"
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" />

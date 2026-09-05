@@ -12,6 +12,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { m } from '@/paraglide/messages';
 import {
@@ -21,17 +22,31 @@ import {
 } from '@/lib/date';
 
 interface AttendanceSheetPageProps {
-  sessionId: string;
-  onBack: () => void;
+  sessionId?: string;
+  onBack?: () => void;
 }
 
 export function AttendanceSheetPage({
   sessionId,
   onBack,
-}: AttendanceSheetPageProps) {
-  const { data: sheet, isLoading } = useAttendanceSheet(sessionId);
+}: AttendanceSheetPageProps = {}) {
+  const navigate = useNavigate();
+  const params = useParams({ strict: false });
+  const effectiveSessionId = sessionId || (params as { sessionId?: string })?.sessionId || '';
+
+  const { data: sheet, isLoading } = useAttendanceSheet(effectiveSessionId);
   const toggleMutation = useToggleAttendance();
   const [togglingStudentId, setTogglingStudentId] = useState<string | null>(null);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else if (sheet?.session?.classId) {
+      navigate({ to: '/classes/$classId', params: { classId: sheet.session.classId } });
+    } else {
+      navigate({ to: '/classes' });
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center py-12 text-sm text-muted-foreground">در حال بارگذاری لیست حضور و غیاب...</div>;
@@ -41,7 +56,7 @@ export function AttendanceSheetPage({
     return (
       <div className="text-center py-12 space-y-3">
         <p className="text-sm text-destructive">اطلاعات جلسه یافت نشد یا دسترسی ندارید.</p>
-        <Button variant="outline" size="sm" onClick={onBack}>بازگشت</Button>
+        <Button variant="outline" size="sm" onClick={handleBack}>بازگشت</Button>
       </div>
     );
   }
@@ -52,7 +67,7 @@ export function AttendanceSheetPage({
 
     try {
       await toggleMutation.mutateAsync({
-        sessionId,
+        sessionId: effectiveSessionId,
         studentId: student.id,
         present: nextStatus,
       });
@@ -75,7 +90,7 @@ export function AttendanceSheetPage({
         <Button
           variant="outline"
           size="sm"
-          onClick={onBack}
+          onClick={handleBack}
           className="h-11 w-11 sm:h-9 sm:w-9 p-0 shrink-0"
           aria-label="Back"
         >

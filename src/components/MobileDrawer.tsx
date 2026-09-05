@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
@@ -19,17 +20,17 @@ import { LanguageToggle } from '@/components/i18n/LanguageToggle';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  currentTab: string;
-  onSelectTab: (tab: string) => void;
+  currentTab?: string;
+  onSelectTab?: (tab: string) => void;
 }
 
 export function MobileDrawer({
   isOpen,
   onClose,
-  currentTab,
   onSelectTab,
 }: MobileDrawerProps) {
   const { user, logout, isAdmin } = useAuth();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // Handle ESC key to dismiss drawer
   useEffect(() => {
@@ -65,14 +66,14 @@ export function MobileDrawer({
   }, [isOpen, onClose]);
 
   const navItems = [
-    { id: 'dashboard', label: m.nav_dashboard(), icon: LayoutDashboard },
-    { id: 'courses', label: m.nav_courses(), icon: GraduationCap },
-    { id: 'classes', label: m.nav_classes(), icon: School },
-    { id: 'students', label: m.nav_students(), icon: Users },
+    { to: '/dashboard', label: m.nav_dashboard(), icon: LayoutDashboard },
+    { to: '/courses', label: m.nav_courses(), icon: GraduationCap },
+    { to: '/classes', label: m.nav_classes(), icon: School },
+    { to: '/students', label: m.nav_students(), icon: Users },
     ...(isAdmin
-      ? [{ id: 'users', label: m.nav_users(), icon: UserCog, badge: 'مدیر' }]
+      ? [{ to: '/users', label: m.nav_users(), icon: UserCog, badge: 'مدیر' } as const]
       : []),
-  ];
+  ] as const;
 
   if (!isOpen) return null;
 
@@ -134,12 +135,17 @@ export function MobileDrawer({
           <nav className="space-y-1.5">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentTab === item.id;
+              const isActive =
+                item.to === '/classes'
+                  ? pathname.startsWith('/classes') || pathname.startsWith('/sessions')
+                  : pathname === item.to || pathname.startsWith(`${item.to}/`);
+
               return (
-                <button
-                  key={item.id}
+                <Link
+                  key={item.to}
+                  to={item.to}
                   onClick={() => {
-                    onSelectTab(item.id);
+                    onSelectTab?.(item.to.slice(1));
                     onClose();
                   }}
                   className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all ${
@@ -152,12 +158,12 @@ export function MobileDrawer({
                     <Icon className="h-5 w-5" />
                     <span>{item.label}</span>
                   </div>
-                  {item.badge && (
+                  {'badge' in item && item.badge && (
                     <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary/40">
                       {item.badge}
                     </Badge>
                   )}
-                </button>
+                </Link>
               );
             })}
           </nav>

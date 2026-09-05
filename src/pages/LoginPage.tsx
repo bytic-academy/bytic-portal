@@ -4,11 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Sparkles, LogIn, AlertCircle } from 'lucide-react';
 import { m } from '@/paraglide/messages';
 
 export function LoginPage() {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +24,8 @@ export function LoginPage() {
 
     try {
       await login(email, password);
+      const destination = (search as { redirect?: string })?.redirect || '/dashboard';
+      navigate({ to: destination, replace: true });
     } catch (err) {
       const rawMsg = err instanceof Error ? err.message : '';
       if (!rawMsg || rawMsg.toLowerCase().includes('invalid') || rawMsg.toLowerCase().includes('password')) {
