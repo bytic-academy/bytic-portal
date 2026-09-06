@@ -39,8 +39,14 @@ export const updateUserSchema = z.object({
 });
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
+export const passwordComplexityRegex = /^(?=.*[a-zA-Z])(?=.*\d)/;
+
 export const resetPasswordSchema = z.object({
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(passwordComplexityRegex, 'Password must contain both letters and numbers'),
+  currentPassword: z.string().optional(),
 });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 

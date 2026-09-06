@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -8,10 +9,12 @@ import {
   UserCog,
   LogOut,
   Layers,
+  KeyRound,
 } from 'lucide-react';
 import { m } from '@/paraglide/messages';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ResetPasswordDialog } from '@/components/ResetPasswordDialog';
 
 interface SidebarProps {
   currentTab?: string;
@@ -20,6 +23,7 @@ interface SidebarProps {
 
 export function Sidebar({ onSelectTab }: SidebarProps) {
   const { user, logout, isAdmin } = useAuth();
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const navItems = [
@@ -88,26 +92,47 @@ export function Sidebar({ onSelectTab }: SidebarProps) {
       {/* User Info & Logout footer */}
       <div className="pt-3 border-t border-border/70 space-y-2">
         {user && (
-          <div className="p-2 rounded-lg bg-muted/40 border border-border/40 text-xs space-y-1.5">
-            <div className="flex items-center justify-between gap-1">
-              <div className="min-w-0">
-                <div className="font-bold text-foreground text-xs truncate">{user.name}</div>
-                <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+          <>
+            <div className="p-2 rounded-lg bg-muted/40 border border-border/40 text-xs space-y-2">
+              <div className="flex items-center justify-between gap-1">
+                <div className="min-w-0">
+                  <div className="font-bold text-foreground text-xs truncate">{user.name}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+                </div>
+                <Badge variant={isAdmin ? 'default' : 'secondary'} className="text-[9px] px-1.5 py-0 shrink-0">
+                  {isAdmin ? 'مدیر' : 'استاد'}
+                </Badge>
               </div>
-              <Badge variant={isAdmin ? 'default' : 'secondary'} className="text-[9px] px-1.5 py-0 shrink-0">
-                {isAdmin ? 'مدیر' : 'استاد'}
-              </Badge>
+
+              <div className="flex items-center gap-1 pt-0.5 border-t border-border/40">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsResetPasswordOpen(true)}
+                  className="flex-1 justify-start text-muted-foreground hover:text-foreground text-[11px] h-7 px-1.5 font-medium"
+                >
+                  <KeyRound className="h-3 w-3 me-1" />
+                  <span>تغییر رمز</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={logout}
+                  className="justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-[11px] h-7 px-1.5 font-medium"
+                >
+                  <LogOut className="h-3 w-3 me-1 rtl:-scale-x-100" />
+                  <span>{m.nav_logout()}</span>
+                </Button>
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-7 px-2 font-medium"
-            >
-              <LogOut className="h-3.5 w-3.5 me-1.5 rtl:-scale-x-100" />
-              <span>{m.nav_logout()}</span>
-            </Button>
-          </div>
+
+            <ResetPasswordDialog
+              isOpen={isResetPasswordOpen}
+              onClose={() => setIsResetPasswordOpen(false)}
+              targetUser={user}
+              isSelf={true}
+            />
+          </>
         )}
       </div>
     </aside>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -10,12 +10,14 @@ import {
   LogOut,
   Layers,
   X,
+  KeyRound,
 } from 'lucide-react';
 import { m } from '@/paraglide/messages';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { LanguageToggle } from '@/components/i18n/LanguageToggle';
+import { ResetPasswordDialog } from '@/components/ResetPasswordDialog';
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -30,6 +32,7 @@ export function MobileDrawer({
   onSelectTab,
 }: MobileDrawerProps) {
   const { user, logout, isAdmin } = useAuth();
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // Handle ESC key to dismiss drawer
@@ -118,16 +121,28 @@ export function MobileDrawer({
             </Button>
           </div>
 
-          {/* User Profile Badge */}
+          {/* User Profile Badge & Actions */}
           {user && (
-            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40 text-xs flex items-center justify-between">
-              <div className="min-w-0 pe-2">
-                <div className="font-bold text-foreground truncate">{user.name}</div>
-                <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40 text-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 pe-2">
+                  <div className="font-bold text-foreground truncate">{user.name}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+                </div>
+                <Badge variant={isAdmin ? 'default' : 'secondary'} className="text-[9px] px-1.5 py-0 shrink-0">
+                  {isAdmin ? 'مدیر' : 'استاد'}
+                </Badge>
               </div>
-              <Badge variant={isAdmin ? 'default' : 'secondary'} className="text-[9px] px-1.5 py-0 shrink-0">
-                {isAdmin ? 'مدیر' : 'استاد'}
-              </Badge>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsResetPasswordOpen(true)}
+                className="w-full justify-center text-xs h-8 gap-1.5 font-medium border-border/70 text-foreground"
+              >
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>تغییر رمز عبور</span>
+              </Button>
             </div>
           )}
 
@@ -193,6 +208,15 @@ export function MobileDrawer({
           </Button>
         </div>
       </div>
+
+      {user && (
+        <ResetPasswordDialog
+          isOpen={isResetPasswordOpen}
+          onClose={() => setIsResetPasswordOpen(false)}
+          targetUser={user}
+          isSelf={true}
+        />
+      )}
     </div>
   );
 }

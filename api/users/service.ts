@@ -104,11 +104,32 @@ export async function updateUser(
   return toSafeUser(user);
 }
 
+export interface ResetPasswordOptions {
+  currentPassword?: string;
+  invalidateSessions?: boolean;
+}
+
 export async function resetPassword(
   prisma: PrismaClient,
   id: string,
-  newPassword: string
+  newPassword: string,
+  options?: ResetPasswordOptions
 ): Promise<{ success: boolean }> {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  if (options?.currentPassword !== undefined) {
+    const isValid = await bcrypt.compare(options.currentPassword, user.passwordHash);
+    if (!isValid) {
+      throw new Error('Current password is incorrect');
+    }
+  }
+
   const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
   await prisma.user.update({
@@ -119,10 +140,12 @@ export async function resetPassword(
     },
   });
 
-  // Invalidate any active sessions for security
-  await prisma.authSession.deleteMany({
-    where: { userId: id },
-  });
+  // Invalidate any active sessions if specified (defaults to true for administrative reset, false for self reset)
+  if (options?.invalidateSessions ?? true) {
+    await prisma.authSession.deleteMany({
+      where: { userId: id },
+    });
+  }
 
   return { success: true };
 }

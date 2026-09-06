@@ -7,7 +7,7 @@ import {
   updateUserSchema,
   resetPasswordSchema,
 } from '../_lib/validation.js';
-import { requireAdmin, getAuthUser } from '../_lib/auth.js';
+import { requireAuth, requireAdmin, getAuthUser } from '../_lib/auth.js';
 import {
   createUser,
   listUsers,
@@ -74,13 +74,38 @@ export function registerUsersRoutes(router: Router) {
     })
   );
 
-  // POST /api/users/:id/reset-password (Admin only)
+  // POST /api/users/:id/reset-password (Admin or Self)
   router.post(
     '/api/users/:id/reset-password',
-    requireAdmin(async (req, res, params) => {
+    requireAuth(async (req, res, params) => {
       try {
-        const { password } = await parseBody(req, resetPasswordSchema);
-        await resetPassword(prisma, params.id, password);
+        const currentUser = getAuthUser(req);
+        const isSelf = currentUser.id === params.id;
+        const isAdmin = currentUser.role === 'ADMIN';
+
+        if (!isAdmin && !isSelf) {
+          sendJson(res, 403, {
+            success: false,
+            error: 'You do not have permission to reset this user password',
+          });
+          return;
+        }
+
+        const body = await parseBody(req, resetPasswordSchema);
+
+        if (isSelf && !body.currentPassword) {
+          sendJson(res, 400, {
+            success: false,
+            error: 'Current password is required',
+          });
+          return;
+        }
+
+        await resetPassword(prisma, params.id, body.password, {
+          currentPassword: isSelf ? body.currentPassword : undefined,
+          invalidateSessions: !isSelf,
+        });
+
         sendJson(res, 200, {
           success: true,
           data: { message: 'Password reset successfully' },

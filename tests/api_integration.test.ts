@@ -2,25 +2,21 @@ import { describe, it, expect } from 'vitest';
 import { apiRouter } from '../api/_lib/router.js';
 import { prisma } from '../api/_lib/prisma.js';
 import { EventEmitter } from 'node:events';
+import crypto from 'node:crypto';
+import { Readable } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { createTestUser } from './helpers.js';
 
 function createMockRequest(method: string, url: string, body?: unknown, cookies?: string): IncomingMessage {
-  const req = new EventEmitter() as unknown as IncomingMessage;
+  const chunks = body !== undefined ? [Buffer.from(JSON.stringify(body))] : [];
+  const req = Readable.from(chunks) as unknown as IncomingMessage;
   req.method = method;
   req.url = url;
   req.headers = {
     host: 'localhost:3000',
     ...(cookies ? { cookie: cookies } : {}),
-    ...(body ? { 'content-type': 'application/json' } : {}),
+    ...(body !== undefined ? { 'content-type': 'application/json' } : {}),
   };
-
-  process.nextTick(() => {
-    if (body) {
-      req.emit('data', Buffer.from(JSON.stringify(body)));
-    }
-    req.emit('end');
-  });
-
   return req;
 }
 
@@ -41,7 +37,7 @@ function createMockResponse(): { res: ServerResponse; getResult: () => Promise<{
       headers[name.toLowerCase()] = value;
     },
     writeHead: (code: number, hdrs?: Record<string, string>) => {
-      statusCode = code;
+      res.statusCode = code;
       if (hdrs) {
         Object.entries(hdrs).forEach(([k, v]) => {
           headers[k.toLowerCase()] = v;
@@ -59,7 +55,7 @@ function createMockResponse(): { res: ServerResponse; getResult: () => Promise<{
       } catch {
         json = body;
       }
-      resolvePromise({ statusCode, json, headers });
+      resolvePromise({ statusCode: res.statusCode, json, headers });
     },
   } as unknown as ServerResponse;
 
@@ -111,5 +107,96 @@ describe('API Router Integration (E2E API Simulation)', () => {
     expect(meResult.statusCode).toBe(200);
     expect(meResult.json.success).toBe(true);
     expect(meResult.json.data.user.email).toBe('admin@bytic.ir');
+  });
+
+  describe('POST /api/users/:id/reset-password Integration', () => {
+    async function createAuthenticatedUser(role: 'ADMIN' | 'TEACHER', password = 'Password123') {
+      const user = await createTestUser(prisma, {
+        role,
+        password,
+      });
+      const token = crypto.randomBytes(32).toString('hex');
+      await prisma.authSession.create({
+        data: {
+          id: crypto.randomUUID(),
+          token,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 86400000),
+        },
+      });
+      return { user, token, cookie: `session_token=${token}` };
+    }
+
+    it('allows a teacher to reset their own password with correct current password and keeps session', async () => {
+      const { user, token, cookie } = await createAuthenticatedUser('TEACHER', 'OldPass123');
+
+      const req = createMockRequest('POST', `/api/users/${user.id}/reset-password`, {
+        currentPassword: 'OldPass123',
+        password: 'NewPass456',
+      }, cookie);
+      const { res, getResult } = createMockResponse();
+
+      const handled = await apiRouter.handle(req, res);
+      expect(handled).toBe(true);
+
+      const result = await getResult();
+      expect(result.statusCode).toBe(200);
+      expect(result.json.success).toBe(true);
+
+      // Session must remain active
+      const sessionInDb = await prisma.authSession.findUnique({ where: { token } });
+      expect(sessionInDb).not.toBeNull();
+    });
+
+    it('rejects self-reset if current password is wrong', async () => {
+      const { user, cookie } = await createAuthenticatedUser('TEACHER', 'OldPass123');
+
+      const req = createMockRequest('POST', `/api/users/${user.id}/reset-password`, {
+        currentPassword: 'WrongPass999',
+        password: 'NewPass456',
+      }, cookie);
+      const { res, getResult } = createMockResponse();
+
+      await apiRouter.handle(req, res);
+      const result = await getResult();
+      expect(result.statusCode).toBe(400);
+      expect(result.json.success).toBe(false);
+      expect(result.json.error).toMatch(/current password/i);
+    });
+
+    it('denies a teacher from resetting another user password with 403 Forbidden', async () => {
+      const teacher1 = await createAuthenticatedUser('TEACHER', 'TeacherPass1');
+      const teacher2 = await createAuthenticatedUser('TEACHER', 'TeacherPass2');
+
+      const req = createMockRequest('POST', `/api/users/${teacher2.user.id}/reset-password`, {
+        password: 'HackedPassword123',
+      }, teacher1.cookie);
+      const { res, getResult } = createMockResponse();
+
+      await apiRouter.handle(req, res);
+      const result = await getResult();
+      expect(result.statusCode).toBe(403);
+      expect(result.json.success).toBe(false);
+      expect(result.json.error).toMatch(/permission/i);
+    });
+
+    it('allows an admin to reset another user password without current password and invalidates sessions', async () => {
+      const admin = await createAuthenticatedUser('ADMIN', 'AdminPass123');
+      const teacher = await createAuthenticatedUser('TEACHER', 'TeacherOldPass');
+
+      const req = createMockRequest('POST', `/api/users/${teacher.user.id}/reset-password`, {
+        password: 'AdminSetPassword123',
+      }, admin.cookie);
+      const { res, getResult } = createMockResponse();
+
+      await apiRouter.handle(req, res);
+      const result = await getResult();
+      expect(result.statusCode).toBe(200);
+      expect(result.json.success).toBe(true);
+
+      // Target teacher's session must be invalidated
+      const teacherSession = await prisma.authSession.findUnique({ where: { token: teacher.token } });
+      expect(teacherSession).toBeNull();
+    });
   });
 });

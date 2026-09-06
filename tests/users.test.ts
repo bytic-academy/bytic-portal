@@ -119,6 +119,74 @@ describe('Users Service (TDD)', () => {
     expect(before?.passwordHash).not.toBe(after?.passwordHash);
   });
 
+  it('self-service resetPassword verifies currentPassword and preserves sessions', async () => {
+    const created = await createUser(db.prisma, {
+      name: 'Self Reset User',
+      email: 'selfreset@bytic.ir',
+      password: 'MyPassword123',
+      role: 'TEACHER',
+    });
+
+    // Create an active session for the user
+    const session = await db.prisma.authSession.create({
+      data: {
+        id: 'session-preserve-test',
+        token: 'token-preserve-test',
+        userId: created.id,
+        expiresAt: new Date(Date.now() + 100000),
+      },
+    });
+
+    // Reject wrong current password
+    await expect(
+      resetPassword(db.prisma, created.id, 'NewPassword456', {
+        currentPassword: 'WrongPassword999',
+        invalidateSessions: false,
+      })
+    ).rejects.toThrow(/current password is incorrect/i);
+
+    // Accept correct current password and preserve session
+    const res = await resetPassword(db.prisma, created.id, 'NewPassword456', {
+      currentPassword: 'MyPassword123',
+      invalidateSessions: false,
+    });
+    expect(res.success).toBe(true);
+
+    const activeSession = await db.prisma.authSession.findUnique({
+      where: { id: session.id },
+    });
+    expect(activeSession).not.toBeNull();
+  });
+
+  it('administrative resetPassword invalidates user sessions without requiring currentPassword', async () => {
+    const created = await createUser(db.prisma, {
+      name: 'Admin Reset Target',
+      email: 'adminreset@bytic.ir',
+      password: 'OldPassword123',
+      role: 'TEACHER',
+    });
+
+    // Create an active session
+    const session = await db.prisma.authSession.create({
+      data: {
+        id: 'session-invalidate-test',
+        token: 'token-invalidate-test',
+        userId: created.id,
+        expiresAt: new Date(Date.now() + 100000),
+      },
+    });
+
+    const res = await resetPassword(db.prisma, created.id, 'NewAdminPassword456', {
+      invalidateSessions: true,
+    });
+    expect(res.success).toBe(true);
+
+    const activeSession = await db.prisma.authSession.findUnique({
+      where: { id: session.id },
+    });
+    expect(activeSession).toBeNull();
+  });
+
   it('deleteUser removes user and prevents deleting own account', async () => {
     const created = await createUser(db.prisma, {
       name: 'To Delete',

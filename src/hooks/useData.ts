@@ -364,10 +364,18 @@ export function useUpdateUser() {
 
 export function useResetPassword() {
   return useMutation({
-    mutationFn: ({ id, password }: { id: string; password: string }) =>
+    mutationFn: ({
+      id,
+      password,
+      currentPassword,
+    }: {
+      id: string;
+      password: string;
+      currentPassword?: string;
+    }) =>
       fetchApi('/api/users/' + id + '/reset-password', {
         method: 'POST',
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, currentPassword }),
       }),
   });
 }

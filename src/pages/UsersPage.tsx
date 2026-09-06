@@ -4,10 +4,10 @@ import {
   useUsers,
   useCreateUser,
   useUpdateUser,
-  useResetPassword,
   useDeleteUser,
   type UserAccount,
 } from '@/hooks/useData';
+import { ResetPasswordDialog } from '@/components/ResetPasswordDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +44,6 @@ export function UsersPage() {
   const { data: users = [], isLoading } = useUsers();
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
-  const resetPasswordMutation = useResetPassword();
   const deleteMutation = useDeleteUser();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -77,7 +76,6 @@ export function UsersPage() {
 
   const handleOpenReset = (u: UserAccount) => {
     setSelectedUser(u);
-    setPassword('');
     setIsResetOpen(true);
   };
 
@@ -115,22 +113,6 @@ export function UsersPage() {
       });
       toast.success('اطلاعات کاربر با موفقیت ویرایش شد');
       setIsEditOpen(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : m.msg_error());
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedUser || !password) return;
-
-    try {
-      await resetPasswordMutation.mutateAsync({
-        id: selectedUser.id,
-        password,
-      });
-      toast.success('رمز عبور کاربر با موفقیت بازنشانی شد');
-      setIsResetOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : m.msg_error());
     }
@@ -397,42 +379,12 @@ export function UsersPage() {
       </Dialog>
 
       {/* Reset Password Dialog */}
-      <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="sm:max-w-md">
-          <form onSubmit={handleResetPassword}>
-            <DialogHeader>
-              <DialogTitle className="text-base font-bold">بازنشانی رمز عبور: {selectedUser?.name}</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4 py-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="resetPassword" className="text-xs font-semibold">
-                  رمز عبور جدید
-                </Label>
-                <Input
-                  id="resetPassword"
-                  type="password"
-                  placeholder="حداقل ۶ کاراکتر"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  dir="ltr"
-                  autoFocus
-                  required
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => setIsResetOpen(false)}>
-                {m.btn_cancel()}
-              </Button>
-              <Button type="submit" disabled={resetPasswordMutation.isPending}>
-                ثبت رمز عبور جدید
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ResetPasswordDialog
+        isOpen={isResetOpen}
+        onClose={() => setIsResetOpen(false)}
+        targetUser={selectedUser}
+        isSelf={selectedUser?.id === currentUser?.id}
+      />
     </div>
   );
 }
