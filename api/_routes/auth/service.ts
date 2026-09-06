@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../_lib/prisma.js';
+import type { PrismaClient } from '../../_lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { createId } from '@paralleldrive/cuid2';

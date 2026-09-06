@@ -1,9 +1,9 @@
-import type { Router } from '../_lib/router.js';
-import { prisma } from '../_lib/prisma.js';
-import { sendJson } from '../_lib/response.js';
-import { parseBody } from '../_lib/body-parser.js';
-import { toggleAttendanceSchema } from '../_lib/validation.js';
-import { requireAuth, getAuthUser } from '../_lib/auth.js';
+import type { Router } from '../../_lib/router.js';
+import { prisma } from '../../_lib/prisma.js';
+import { sendJson } from '../../_lib/response.js';
+import { parseBody } from '../../_lib/body-parser.js';
+import { toggleAttendanceSchema } from '../../_lib/validation.js';
+import { requireAuth, getAuthUser } from '../../_lib/auth.js';
 import { getAttendanceSheet, toggleAttendance } from './service.js';
 
 export function registerAttendanceRoutes(router: Router) {

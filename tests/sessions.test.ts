@@ -12,7 +12,7 @@ import {
   getSessionById,
   updateSession,
   deleteSession,
-} from '../api/sessions/service.js';
+} from '../api/_routes/sessions/service.js';
 
 describe('Sessions Service (TDD)', () => {
   let db: TestDb;

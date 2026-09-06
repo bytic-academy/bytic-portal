@@ -1,13 +1,13 @@
-import type { Router } from '../_lib/router.js';
-import { prisma } from '../_lib/prisma.js';
-import { sendJson } from '../_lib/response.js';
-import { parseBody } from '../_lib/body-parser.js';
+import type { Router } from '../../_lib/router.js';
+import { prisma } from '../../_lib/prisma.js';
+import { sendJson } from '../../_lib/response.js';
+import { parseBody } from '../../_lib/body-parser.js';
 import {
   createSessionSchema,
   bulkCreateSessionSchema,
   updateSessionSchema,
-} from '../_lib/validation.js';
-import { requireAuth, getAuthUser } from '../_lib/auth.js';
+} from '../../_lib/validation.js';
+import { requireAuth, getAuthUser } from '../../_lib/auth.js';
 import {
   createSession,
   bulkCreateSessions,

@@ -1,9 +1,14 @@
 {
   "framework": "vite",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "prisma/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "destination": "/api"
     },
     {
       "source": "/(.*)",

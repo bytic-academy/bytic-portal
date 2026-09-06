@@ -6,7 +6,7 @@ import {
   validateSession,
   logout,
   getCurrentUser,
-} from '../api/auth/service.js';
+} from '../api/_routes/auth/service.js';
 
 describe('Auth Service (TDD)', () => {
   let db: TestDb;

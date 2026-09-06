@@ -1,4 +1,4 @@
-﻿# Bytic Attendance System
+# Bytic Attendance System
 
 > Modern, high-performance student attendance and roster management system built for **Bytic Educational Group** ([bytic.ir](https://bytic.ir)).
 
@@ -197,48 +197,62 @@ sudo certbot --nginx -d attendance.yourdomain.com
 
 ---
 
-## ☁️ Cloud Deployment: Vercel + Turso
+## ☁️ Cloud Deployment: Vercel + Turso (Automated "Push to Deploy")
 
-For serverless cloud deployment, use **Vercel** for hosting the frontend & serverless API routes, and **Turso** (libSQL cloud) as the database.
+For serverless cloud deployment, the application is preconfigured for **Vercel** (hosting the static SPA & catch-all serverless API) and **Turso** (distributed libSQL database).
 
-### Step 1: Create a Turso Database
-1. Install Turso CLI:
+Database schema migrations and seed data are **automatically synchronized** during every Vercel build via `scripts/sync-turso.ts`.
+
+### Option A: Zero-Configuration via Vercel Marketplace (Recommended)
+
+1. **Import Git Repository**:
+   - Go to [Vercel Dashboard](https://vercel.com) and import `bytic-academy/bytic-portal`.
+   - Vercel automatically detects the Vite framework and uses `pnpm install` / `pnpm run build`.
+
+2. **Connect Turso Database (1-Click)**:
+   - In your Vercel Project, navigate to **Integrations** -> Search for **Turso**.
+   - Click **Add Integration** and connect your GitHub or Turso account.
+   - Turso automatically creates a database and sets `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in your project's environment variables.
+
+3. **Deploy**:
+   - Trigger the deployment. The Vercel build automatically runs `scripts/sync-turso.ts` to push the schema DDL to Turso, seeds the initial administrator account (`admin@bytic.ir`), builds frontend assets, and deploys live.
+
+---
+
+### Option B: Direct Turso Setup
+
+1. **Create Turso Database**:
+   - Sign up or log in at [turso.tech](https://turso.tech) (or via `turso` CLI).
+   - Create a database:
+     ```bash
+     turso db create bytic-attendance
+     ```
+   - Retrieve your connection URL and create an auth token:
+     ```bash
+     turso db show bytic-attendance --url
+     # Example: libsql://bytic-attendance-[org].turso.io
+
+     turso db tokens create bytic-attendance
+     ```
+
+2. **Configure Environment Variables in Vercel**:
+   - In Vercel Project Settings -> **Environment Variables**, add:
+     - `TURSO_DATABASE_URL`: `libsql://bytic-attendance-[org].turso.io`
+     - `TURSO_AUTH_TOKEN`: `your-turso-auth-token`
+
+3. **Deploy & Ongoing Git-Ops**:
+   - Push to your GitHub `main` branch.
+   - Vercel automatically runs `pnpm run build`, which:
+     1. Compiles translations (`paraglide-js`).
+     2. Runs `scripts/sync-turso.ts` (applies Prisma schema DDL diffs to Turso & seeds admin if empty).
+     3. Typechecks and builds static assets (`vite build`).
+     4. Deploys the unified serverless API (`api/index.ts`) and global edge CDN.
+
+4. **Manual Remote Schema Sync (Optional)**:
+   You can also sync your schema to Turso directly from your local machine anytime:
    ```bash
-   curl -sSfL https://get.tur.so/install.sh | bash
+   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." pnpm run db:sync:turso
    ```
-2. Login and create a database:
-   ```bash
-   turso auth login
-   turso db create bytic-attendance
-   ```
-3. Get the database URL and create an auth token:
-   ```bash
-   turso db show bytic-attendance --url
-   # Example output: libsql://bytic-attendance-youruser.turso.io
-
-   turso db tokens create bytic-attendance
-   # Example output: eyJhbGciOi...
-   ```
-
-### Step 2: Push Database Schema to Turso
-Apply the schema to your remote Turso database:
-```bash
-TURSO_DATABASE_URL="libsql://bytic-attendance-youruser.turso.io" \
-TURSO_AUTH_TOKEN="your-turso-auth-token" \
-pnpm run db:push
-```
-
-### Step 3: Deploy to Vercel
-1. Import your Git repository in the [Vercel Dashboard](https://vercel.com).
-2. Set the following **Environment Variables** in Vercel Project Settings:
-   - `TURSO_DATABASE_URL`: `libsql://bytic-attendance-youruser.turso.io`
-   - `TURSO_AUTH_TOKEN`: `your-turso-auth-token`
-3. Configure Build Settings:
-   - **Framework Preset**: `Vite`
-   - **Build Command**: `pnpm run build`
-   - **Output Directory**: `dist`
-   - **Install Command**: `pnpm install`
-4. Click **Deploy**. Vercel will build the frontend assets and automatically host the serverless functions in `/api`.
 
 ---
 

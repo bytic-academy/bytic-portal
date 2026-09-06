@@ -11,7 +11,7 @@ import {
 import {
   getAttendanceSheet,
   toggleAttendance,
-} from '../api/attendance/service.js';
+} from '../api/_routes/attendance/service.js';
 
 describe('Attendance Service (TDD)', () => {
   let db: TestDb;

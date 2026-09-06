@@ -12,7 +12,7 @@ import {
   getStudentById,
   updateStudent,
   deleteStudent,
-} from '../api/students/service.js';
+} from '../api/_routes/students/service.js';
 
 describe('Students Service (TDD)', () => {
   let db: TestDb;

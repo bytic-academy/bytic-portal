@@ -1,10 +1,10 @@
-import type { PrismaClient } from '../_lib/prisma.js';
+import type { PrismaClient } from '../../_lib/prisma.js';
 import { createId } from '@paralleldrive/cuid2';
 import type {
   CreateSessionInput,
   BulkCreateSessionInput,
   UpdateSessionInput,
-} from '../_lib/validation.js';
+} from '../../_lib/validation.js';
 
 async function verifyClassAccess(
   prisma: PrismaClient,

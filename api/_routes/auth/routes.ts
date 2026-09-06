@@ -1,11 +1,11 @@
-import type { Router } from '../_lib/router.js';
-import { prisma } from '../_lib/prisma.js';
-import { sendJson } from '../_lib/response.js';
-import { parseBody } from '../_lib/body-parser.js';
-import { loginSchema } from '../_lib/validation.js';
-import { getSessionToken, makeSessionCookie, makeClearSessionCookie } from '../_lib/cookies.js';
+import type { Router } from '../../_lib/router.js';
+import { prisma } from '../../_lib/prisma.js';
+import { sendJson } from '../../_lib/response.js';
+import { parseBody } from '../../_lib/body-parser.js';
+import { loginSchema } from '../../_lib/validation.js';
+import { getSessionToken, makeSessionCookie, makeClearSessionCookie } from '../../_lib/cookies.js';
 import { login, logout } from './service.js';
-import { requireAuth, getAuthUser } from '../_lib/auth.js';
+import { requireAuth, getAuthUser } from '../../_lib/auth.js';
 
 export function registerAuthRoutes(router: Router) {
   // POST /api/auth/login

@@ -1,6 +1,6 @@
-import type { PrismaClient } from '../_lib/prisma.js';
+import type { PrismaClient } from '../../_lib/prisma.js';
 import { createId } from '@paralleldrive/cuid2';
-import type { CreateStudentInput, UpdateStudentInput } from '../_lib/validation.js';
+import type { CreateStudentInput, UpdateStudentInput } from '../../_lib/validation.js';
 
 export async function createStudent(
   prisma: PrismaClient,

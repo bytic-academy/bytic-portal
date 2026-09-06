@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "pnpm compile:i18n && tsx scripts/sync-turso.ts && tsc -b && vite build",
     "start": "tsx server/index.ts",
     "preview": "vite preview",
     "compile:i18n": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide",
@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:sync:turso": "tsx scripts/sync-turso.ts",
     "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },

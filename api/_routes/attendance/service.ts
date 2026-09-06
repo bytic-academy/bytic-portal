@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../_lib/prisma.js';
+import type { PrismaClient } from '../../_lib/prisma.js';
 import { createId } from '@paralleldrive/cuid2';
 
 async function verifySessionAccess(

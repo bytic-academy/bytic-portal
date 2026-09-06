@@ -8,7 +8,7 @@ import {
   updateUser,
   resetPassword,
   deleteUser,
-} from '../api/users/service.js';
+} from '../api/_routes/users/service.js';
 
 describe('Users Service (TDD)', () => {
   let db: TestDb;

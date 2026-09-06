@@ -1,7 +1,7 @@
-import type { PrismaClient } from '../_lib/prisma.js';
+import type { PrismaClient } from '../../_lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import { createId } from '@paralleldrive/cuid2';
-import type { CreateUserInput, UpdateUserInput } from '../_lib/validation.js';
+import type { CreateUserInput, UpdateUserInput } from '../../_lib/validation.js';
 
 const SALT_ROUNDS = 10;
 

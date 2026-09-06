@@ -15,7 +15,7 @@ import {
   removeTeacher,
   enrollStudent,
   unenrollStudent,
-} from '../api/classes/service.js';
+} from '../api/_routes/classes/service.js';
 
 describe('Classes Service (TDD)', () => {
   let db: TestDb;

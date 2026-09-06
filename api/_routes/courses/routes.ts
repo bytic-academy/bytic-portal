@@ -1,9 +1,9 @@
-import type { Router } from '../_lib/router.js';
-import { prisma } from '../_lib/prisma.js';
-import { sendJson } from '../_lib/response.js';
-import { parseBody } from '../_lib/body-parser.js';
-import { createCourseSchema, updateCourseSchema } from '../_lib/validation.js';
-import { requireAuth, requireAdmin } from '../_lib/auth.js';
+import type { Router } from '../../_lib/router.js';
+import { prisma } from '../../_lib/prisma.js';
+import { sendJson } from '../../_lib/response.js';
+import { parseBody } from '../../_lib/body-parser.js';
+import { createCourseSchema, updateCourseSchema } from '../../_lib/validation.js';
+import { requireAuth, requireAdmin } from '../../_lib/auth.js';
 import {
   createCourse,
   listCourses,

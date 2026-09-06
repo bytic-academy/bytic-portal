@@ -6,7 +6,7 @@ import {
   getCourseById,
   updateCourse,
   deleteCourse,
-} from '../api/courses/service.js';
+} from '../api/_routes/courses/service.js';
 
 describe('Courses Service (TDD)', () => {
   let db: TestDb;

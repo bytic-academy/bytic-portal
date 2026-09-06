@@ -63,7 +63,12 @@ export class Router {
   }
 
   public async handle(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
-    const parsedUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    const rawUrl =
+      (req.headers['x-matched-path'] as string) ||
+      (req.headers['x-forwarded-uri'] as string) ||
+      req.url ||
+      '/';
+    const parsedUrl = new URL(rawUrl, `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
     const reqMethod = (req.method || 'GET').toUpperCase() as HttpMethod;
 
@@ -108,13 +113,13 @@ export class Router {
   }
 }
 
-import { registerAuthRoutes } from '../auth/routes.js';
-import { registerUsersRoutes } from '../users/routes.js';
-import { registerCoursesRoutes } from '../courses/routes.js';
-import { registerClassesRoutes } from '../classes/routes.js';
-import { registerStudentsRoutes } from '../students/routes.js';
-import { registerSessionsRoutes } from '../sessions/routes.js';
-import { registerAttendanceRoutes } from '../attendance/routes.js';
+import { registerAuthRoutes } from '../_routes/auth/routes.js';
+import { registerUsersRoutes } from '../_routes/users/routes.js';
+import { registerCoursesRoutes } from '../_routes/courses/routes.js';
+import { registerClassesRoutes } from '../_routes/classes/routes.js';
+import { registerStudentsRoutes } from '../_routes/students/routes.js';
+import { registerSessionsRoutes } from '../_routes/sessions/routes.js';
+import { registerAttendanceRoutes } from '../_routes/attendance/routes.js';
 
 export function createDefaultApiRouter(): Router {
   const router = new Router();
